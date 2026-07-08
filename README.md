@@ -112,12 +112,24 @@ This package was built by reading `crates/mycelium-tero/src/bin/tero-mcp.rs` and
 - the **same token-scoped auth model** (per-call `token` argument, `read`/`refresh` scopes, refuse
   to start with no tokens).
 
-It is **not** guaranteed byte-identical to the Rust server's JSON (field ordering, exact wording of
-some messages) — this is an independent Python implementation of the same contract, not a
-transliteration. Where behavior could plausibly diverge (the `cross_ref` clamp-reporting rule, the
-`is_dedup_suffix_of` anchor-matching grammar, the `Family` sort-rank order used for the canonical key)
-this package copies the Rust logic structurally, not just by description, specifically to avoid
-silent semantic drift.
+The **wire-visible shapes checked by `tests/test_rust_parity.py`** — tool descriptor JSON (values
+*and* key order), the JSON-RPC error code mapping, auth-error message wording, refusal variant tags,
+and the process exit codes — are transcribed verbatim from the Rust source and asserted byte-for-byte
+equal; a diff there means real drift, not a documentation gap. Where behavior could plausibly diverge
+structurally (the `cross_ref` clamp-reporting rule, the `is_dedup_suffix_of` anchor-matching grammar,
+the `Family` sort-rank order used for the canonical key, the text-search scoring weights) this package
+copies the Rust logic structurally, not just by description, specifically to avoid silent semantic
+drift.
+
+The one **deliberate, documented** divergence is the `identify` tool's *payload* (not its tool
+descriptor, which does match): `name`/`engine`/`summary` describe this Python server's own identity
+("tero-mcp-lite", Layer-1-only) rather than claiming to be the Rust binary — an honest identity
+beats a byte-identical lie. `tests/test_rust_parity.py` does not assert this field, and the
+`serverInfo.name` in `initialize` is likewise `"tero-mcp-lite"`, by design.
+
+The parity test suite is a **transcription-derived** check, not a live differential (no checked-out
+Rust source is available at Python test/CI time here) — see "Framework — remaining tasks" below for
+the live-differential follow-up.
 
 ## Why a minimal implementation instead of the official `mcp` Python SDK
 
@@ -144,24 +156,71 @@ than by adding runtime weight the package doesn't need. If a future maintainer w
 coverage (resources, prompts, sampling, elicitation, streamable-HTTP transport, ...), switching to the
 `mcp` SDK is a reasonable evolution — see "Framework — remaining tasks" below.
 
+## Adding a new tool (the registry pattern)
+
+`src/tero_mcp_lite/mcp_server.py` derives both `tools/list`'s descriptors and `tools/call`'s
+dispatch + auth-scope check from one declarative `TOOL_REGISTRY: dict[str, ToolSpec]`. Adding a tool
+means adding one `ToolSpec` — nothing else in the file changes.
+
+```python
+from tero_mcp_lite.mcp_server import ToolSpec, TOKEN_ARG
+
+def _handle_my_tool(state: McpState, args: dict) -> dict:
+    ...  # read args, touch state.report, return a JSON-able dict
+
+my_tool = ToolSpec(
+    name="my_tool",
+    description="One line: what it does.",
+    properties={"some_arg": {"type": "string"}, "token": TOKEN_ARG},
+    required=("some_arg", "token"),
+    handler=_handle_my_tool,
+    # scope=Scope.REFRESH,  # omit for the default (read-only)
+)
+```
+
+then add `my_tool` to the `specs` list in `_build_registry()`. That's it:
+
+- `tools/list` advertises it automatically (`ToolSpec.descriptor()`, derived — see
+  `_tool_descriptors()`).
+- `tools/call` authorizes against `scope` (default `Scope.READ`) and dispatches to `handler`
+  automatically (`_handle_tools_call()`).
+- A new **query kind** (as opposed to a new top-level tool) is a smaller change: add the kind to
+  `tero_mcp_lite.query.Query.parse` + a `_<kind>()` function in `query.py` (mirroring the existing
+  `_by_id`/`_by_status`/`_cross_ref`/`_text` shape — refuse on an empty match set, always attach an
+  `Explain` trace), then wire a `ToolSpec` (or extend `cite`/`explain`'s `kind` argument, since those
+  already forward whatever `kind` string they're given) exactly as above.
+- Extend `tests/test_rust_parity.py`'s `RUST_TOOL_DESCRIPTORS` (and, if the tool has a Rust-side
+  twin, transcribe its exact wording from source) so the new tool's shape stays pinned too.
+
 ## Tests
 
 ```bash
 uv run pytest
 ```
 
-Covers: a JSON-RPC round-trip (`initialize` → `tools/list` → `query_by_id` returning a cited answer)
-and a refusal test (an uncited query returns a typed refusal, never an empty result). Both are fast
-and fully offline (an in-memory synthetic index — no network, no real repo required).
+Covers: a JSON-RPC round-trip (`initialize` → `tools/list` → `query_by_id` returning a cited answer),
+a refusal test (an uncited query returns a typed refusal, never an empty result), unit coverage for
+auth/query/model, and `tests/test_rust_parity.py` — the Rust-source-transcribed byte-level checks
+described above. All fast and fully offline (an in-memory synthetic index — no network, no real repo
+required).
 
 ## Framework — remaining tasks
 
 A checklist for whoever picks this up next (in this repo or an extracted one):
 
-- [ ] **Byte-level parity harness.** A differential test that runs both the Rust `tero-mcp` and this
-      package over the *same* `index.json` and diffs their JSON-RPC responses field-by-field, to
-      catch any semantic drift introduced after this initial build (there is none known at time of
-      writing, but neither server enforces it automatically).
+- [x] **Byte-level parity harness — transcription version.** `tests/test_rust_parity.py` pins the
+      tool descriptor JSON (values + key order), the JSON-RPC error code mapping, auth-error
+      wording, refusal variant tags, and exit codes as verbatim transcriptions of the Rust source.
+      This caught two real wording bugs on introduction (an `identify` tool description with an
+      extra clause, `...` where the Rust source uses `…`) — evidence the check has teeth.
+- [ ] **Byte-level parity harness — live differential.** The stronger version: a test that actually
+      runs both the Rust `tero-mcp` binary and this package over the *same* `index.json` and diffs
+      their JSON-RPC responses field-by-field, so a *future* Rust-side wording change is caught
+      automatically instead of requiring a human to notice and re-transcribe. Needs a Rust toolchain
+      + a built `tero-mcp` binary available at test time, which this repo's own CI does not provide
+      (this package is meant to be extracted/dropped into other repos, most of which won't have the
+      `mycelium` Rust crate either) — plausibly a `mycelium`-repo-side CI job instead of a
+      `tero-mcp-lite`-side one.
 - [ ] **HTTP front.** The Rust crate also ships `tero-http` (a plain HTTP/JSON front sharing the same
       core). This package only implements the MCP/stdio front; an HTTP front (e.g. `http.server` or a
       minimal ASGI app) is a natural, still-lightweight follow-up if a non-MCP client needs it.
