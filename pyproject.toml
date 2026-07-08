@@ -1,0 +1,32 @@
+[project]
+name = "tero-mcp-lite"
+version = "0.1.0"
+description = "A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json — the Python-only counterpart to mycelium-tero's Rust tero-mcp front."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "tz-dev", email = "tz-dev@vectorweight.com" },
+]
+requires-python = ">=3.11"
+# Deliberately dependency-free at runtime (stdlib json/sys/argparse only) — see README.md
+# "Framework — remaining tasks" for the evaluated-and-rejected `mcp` SDK tradeoff. `uv` is still
+# the real project/dependency manager (see [dependency-groups] below); "not stdlib-only" is
+# satisfied at the project-management layer (pytest, uv.lock) without adding runtime weight to a
+# package whose whole point is to be a small, portable drop-in for another repo.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/tzervas"
+Contact = "tz-dev@vectorweight.com"
+
+[project.scripts]
+tero-mcp-lite = "tero_mcp_lite:main"
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
