@@ -77,7 +77,9 @@ class FrontError(Exception):
     @staticmethod
     def from_auth_error(e: AuthError) -> "FrontError":
         if e.kind == "missing":
-            return FrontError("unauthorized", "missing bearer token")
+            return FrontError(
+                "unauthorized", "missing bearer token (Authorization: Bearer <token>)"
+            )
         if e.kind == "invalid":
             return FrontError("unauthorized", "invalid token")
         return FrontError("forbidden", e.message())

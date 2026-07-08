@@ -10,18 +10,25 @@ malformed/unauthorized/unknown call is a JSON-RPC error.
 **Auth.** Each `tools/call` carries a `token` argument (the bearer, checked against `TERO_TOKENS`);
 it is authorized against the operation's required scope before dispatch — matching the Rust server's
 per-call (not per-transport-connection) auth model exactly.
+
+**Extensibility — the tool registry.** Every tool is one declarative [`ToolSpec`] entry in
+[`TOOL_REGISTRY`]: a name, its `tools/list` JSON-Schema pieces (`properties`/`required`), the scope
+it needs, and the handler that runs it. `tools/list` and `tools/call` dispatch are both *derived*
+from the registry — nothing else needs to change to add a tool. See README.md "Adding a new tool"
+for a worked example.
 """
 
 from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TextIO
 
 from . import __version__
-from .auth import AuthError, TokenTable
+from .auth import AuthError, Scope, TokenTable
 from .core import (
     VIEW_CITE,
     VIEW_EXPLAIN,
@@ -37,12 +44,210 @@ from .model import TeroIndexReport, load_report
 SERVER_NAME = "tero-mcp-lite"
 PROTOCOL_VERSION = "2025-06-18"
 
+# The single `token` schema fragment every tool's `inputSchema.properties` carries.
+TOKEN_ARG: dict[str, Any] = {
+    "type": "string",
+    "description": "bearer token (from TERO_TOKENS)",
+}
+
 
 @dataclass
 class McpState:
     report: TeroIndexReport
     tokens: TokenTable
     index_path: Path
+
+
+ToolHandler = Callable[[McpState, dict[str, Any]], dict[str, Any]]
+
+
+@dataclass(frozen=True)
+class ToolSpec:
+    """One declarative tool entry — the whole surface a new tool needs to plug in.
+
+    `tools/list`'s descriptor and `tools/call`'s dispatch + auth-scope check are both derived from
+    this (see [`_tool_descriptors`] / [`_handle_tools_call`]) — registering a tool means adding one
+    `ToolSpec` to [`TOOL_REGISTRY`], nothing else.
+    """
+
+    name: str
+    description: str
+    properties: dict[str, Any]
+    required: tuple[str, ...]
+    handler: ToolHandler
+    scope: Scope = Scope.READ
+
+    def descriptor(self) -> dict[str, Any]:
+        """The `tools/list` JSON descriptor for this tool."""
+        return {
+            "name": self.name,
+            "description": self.description,
+            "inputSchema": {
+                "type": "object",
+                "properties": self.properties,
+                "required": list(self.required),
+            },
+        }
+
+
+def _query(
+    state: McpState,
+    kind: str,
+    value: str | None,
+    start: str | None,
+    depth: str | None,
+    view: str,
+) -> dict[str, Any]:
+    q = parse_query(kind, value, start, depth)
+    return run_and_envelope(state.report, q, view)
+
+
+def _handle_identify(state: McpState, _args: dict[str, Any]) -> dict[str, Any]:
+    return identify_value(state.report, str(state.index_path))
+
+
+def _handle_refresh(state: McpState, _args: dict[str, Any]) -> dict[str, Any]:
+    try:
+        fresh = load_report(state.index_path)
+    except Exception as e:  # noqa: BLE001 - surfaced as a FrontError, never a silent stale-serve
+        raise FrontError.internal(f"could not reload {state.index_path}: {e}") from e
+    state.report = fresh
+    return {"kind": "refreshed", "ok": True, "items": len(fresh.items)}
+
+
+def _fixed_kind_handler(kind: str, view: str) -> ToolHandler:
+    """A handler for a tool whose query `kind` is fixed by the tool itself (`query_by_id` is always
+    `kind="id"`, etc.) — the args just supply the kind's own value/start/depth. Mirrors
+    `front::mcp::dispatch`'s per-tool `query(state, "<kind>", ...)` calls in the Rust server.
+    """
+
+    def handler(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+        return _query(
+            state, kind, args.get("value"), args.get("start"), args.get("depth"), view
+        )
+
+    return handler
+
+
+def _arg_kind_handler(view: str) -> ToolHandler:
+    """A handler for a tool whose query `kind` is itself an argument (`cite`/`explain` take
+    `kind` + that kind's own args, mirroring `query_by_*`).
+    """
+
+    def handler(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+        return _query(
+            state,
+            args.get("kind") or "",
+            args.get("value"),
+            args.get("start"),
+            args.get("depth"),
+            view,
+        )
+
+    return handler
+
+
+def _build_registry() -> dict[str, ToolSpec]:
+    """Build [`TOOL_REGISTRY`] in `tools/list` order (matches `front::mcp::tool_descriptors`'s
+    order in the Rust server exactly — a plain Python `dict` preserves insertion order).
+    """
+    specs = [
+        ToolSpec(
+            name="identify",
+            description="Server identity, version, and whether the Layer-2 gate is open.",
+            properties={"token": TOKEN_ARG},
+            required=("token",),
+            handler=_handle_identify,
+        ),
+        ToolSpec(
+            name="query_by_id",
+            description="Exact lookup by corpus id (RFC-0034, M-1015, DN-87, an issue id).",
+            properties={
+                "value": {"type": "string", "description": "the id to match"},
+                "token": TOKEN_ARG,
+            },
+            required=("value", "token"),
+            handler=_fixed_kind_handler("id", VIEW_FULL),
+        ),
+        ToolSpec(
+            name="query_by_status",
+            description="All rows with a given status (Accepted, todo, done, …).",
+            properties={"value": {"type": "string"}, "token": TOKEN_ARG},
+            required=("value", "token"),
+            handler=_fixed_kind_handler("status", VIEW_FULL),
+        ),
+        ToolSpec(
+            name="query_by_kind",
+            description=(
+                "All rows of a given kind (rfc, adr, note, issue, section, …)."
+            ),
+            properties={"value": {"type": "string"}, "token": TOKEN_ARG},
+            required=("value", "token"),
+            handler=_fixed_kind_handler("kind", VIEW_FULL),
+        ),
+        ToolSpec(
+            name="cross_ref",
+            description="Breadth-first walk of depends_on/doc_refs edges from a start id/anchor.",
+            properties={
+                "start": {"type": "string"},
+                "depth": {"type": "string", "description": "hop count (default 1)"},
+                "token": TOKEN_ARG,
+            },
+            required=("start", "token"),
+            handler=_fixed_kind_handler("cross_ref", VIEW_FULL),
+        ),
+        ToolSpec(
+            name="text_search",
+            description="Ranked free-text search over id/title/summary.",
+            properties={
+                "value": {"type": "string", "description": "the query text"},
+                "token": TOKEN_ARG,
+            },
+            required=("value", "token"),
+            handler=_fixed_kind_handler("text", VIEW_FULL),
+        ),
+        ToolSpec(
+            name="cite",
+            description="Citations only for a query (kind + its args, as query_*).",
+            properties={
+                "kind": {
+                    "type": "string",
+                    "description": "id|status|kind|cross_ref|text",
+                },
+                "value": {"type": "string"},
+                "start": {"type": "string"},
+                "depth": {"type": "string"},
+                "token": TOKEN_ARG,
+            },
+            required=("kind", "token"),
+            handler=_arg_kind_handler(VIEW_CITE),
+        ),
+        ToolSpec(
+            name="explain",
+            description="EXPLAIN trace only for a query (kind + its args, as query_*).",
+            properties={
+                "kind": {"type": "string"},
+                "value": {"type": "string"},
+                "start": {"type": "string"},
+                "depth": {"type": "string"},
+                "token": TOKEN_ARG,
+            },
+            required=("kind", "token"),
+            handler=_arg_kind_handler(VIEW_EXPLAIN),
+        ),
+        ToolSpec(
+            name="refresh",
+            description="Reload the served index from disk (requires the `refresh` scope).",
+            properties={"token": TOKEN_ARG},
+            required=("token",),
+            handler=_handle_refresh,
+            scope=required_scope("refresh"),
+        ),
+    ]
+    return {spec.name: spec for spec in specs}
+
+
+TOOL_REGISTRY: dict[str, ToolSpec] = _build_registry()
 
 
 def serve_mcp_stdio(
@@ -132,78 +337,31 @@ def _initialize_result() -> dict[str, Any]:
 
 
 def _handle_tools_call(state: McpState, msg: dict[str, Any]) -> dict[str, Any]:
+    """Extract `name`/`arguments`, authorize the token, then dispatch through [`TOOL_REGISTRY`].
+
+    Auth happens **before** the unknown-tool check (matching `front::mcp::handle_tools_call`'s
+    order in the Rust server exactly: `core::required_scope(name)` defaults an unrecognized name to
+    `Scope::Read`, so an unauthenticated call to a bogus tool name still fails on auth, not on
+    "unknown tool" — a client can't probe for tool names without a valid token).
+    """
     params = msg.get("params") or {}
     name = params.get("name")
     if not isinstance(name, str):
         raise FrontError.bad_request("tools/call requires a string `name`")
     args = params.get("arguments") or {}
 
+    spec = TOOL_REGISTRY.get(name)
+    scope = spec.scope if spec is not None else required_scope(name)
+
     token = args.get("token")
     try:
-        state.tokens.authorize(token, required_scope(name))
+        state.tokens.authorize(token, scope)
     except AuthError as e:
         raise FrontError.from_auth_error(e) from e
 
-    return _dispatch(state, name, args)
-
-
-def _dispatch(state: McpState, name: str, args: dict[str, Any]) -> dict[str, Any]:
-    get = lambda k: args.get(k)  # noqa: E731
-
-    if name == "identify":
-        return identify_value(state.report, str(state.index_path))
-    if name == "query_by_id":
-        return _query(state, "id", get("value"), None, None, VIEW_FULL)
-    if name == "query_by_status":
-        return _query(state, "status", get("value"), None, None, VIEW_FULL)
-    if name == "query_by_kind":
-        return _query(state, "kind", get("value"), None, None, VIEW_FULL)
-    if name == "cross_ref":
-        return _query(state, "cross_ref", None, get("start"), get("depth"), VIEW_FULL)
-    if name == "text_search":
-        return _query(state, "text", get("value"), None, None, VIEW_FULL)
-    if name == "cite":
-        return _query(
-            state,
-            get("kind") or "",
-            get("value"),
-            get("start"),
-            get("depth"),
-            VIEW_CITE,
-        )
-    if name == "explain":
-        return _query(
-            state,
-            get("kind") or "",
-            get("value"),
-            get("start"),
-            get("depth"),
-            VIEW_EXPLAIN,
-        )
-    if name == "refresh":
-        return _refresh(state)
-    raise FrontError.bad_request(f"unknown tool {name!r} (see tools/list)")
-
-
-def _query(
-    state: McpState,
-    kind: str,
-    value: str | None,
-    start: str | None,
-    depth: str | None,
-    view: str,
-) -> dict[str, Any]:
-    q = parse_query(kind, value, start, depth)
-    return run_and_envelope(state.report, q, view)
-
-
-def _refresh(state: McpState) -> dict[str, Any]:
-    try:
-        fresh = load_report(state.index_path)
-    except Exception as e:  # noqa: BLE001 - surfaced as a FrontError, never a silent stale-serve
-        raise FrontError.internal(f"could not reload {state.index_path}: {e}") from e
-    state.report = fresh
-    return {"kind": "refreshed", "ok": True, "items": len(fresh.items)}
+    if spec is None:
+        raise FrontError.bad_request(f"unknown tool {name!r} (see tools/list)")
+    return spec.handler(state, args)
 
 
 def _finish_call(id_: Any, outcome: dict[str, Any] | FrontError) -> dict[str, Any]:
@@ -218,100 +376,6 @@ def _finish_call(id_: Any, outcome: dict[str, Any] | FrontError) -> dict[str, An
     )
 
 
-def _tool(
-    name: str, description: str, properties: dict[str, Any], required: list[str]
-) -> dict[str, Any]:
-    return {
-        "name": name,
-        "description": description,
-        "inputSchema": {
-            "type": "object",
-            "properties": properties,
-            "required": required,
-        },
-    }
-
-
 def _tool_descriptors() -> list[dict[str, Any]]:
-    tok = {"type": "string", "description": "bearer token (from TERO_TOKENS)"}
-    return [
-        _tool(
-            "identify",
-            "Server identity, version, and whether the Layer-2 gate is open (always false here).",
-            {"token": tok},
-            ["token"],
-        ),
-        _tool(
-            "query_by_id",
-            "Exact lookup by corpus id (RFC-0034, M-1015, DN-87, an issue id).",
-            {
-                "value": {"type": "string", "description": "the id to match"},
-                "token": tok,
-            },
-            ["value", "token"],
-        ),
-        _tool(
-            "query_by_status",
-            "All rows with a given status (Accepted, todo, done, ...).",
-            {"value": {"type": "string"}, "token": tok},
-            ["value", "token"],
-        ),
-        _tool(
-            "query_by_kind",
-            "All rows of a given kind (rfc, adr, note, issue, section, ...).",
-            {"value": {"type": "string"}, "token": tok},
-            ["value", "token"],
-        ),
-        _tool(
-            "cross_ref",
-            "Breadth-first walk of depends_on/doc_refs edges from a start id/anchor.",
-            {
-                "start": {"type": "string"},
-                "depth": {"type": "string", "description": "hop count (default 1)"},
-                "token": tok,
-            },
-            ["start", "token"],
-        ),
-        _tool(
-            "text_search",
-            "Ranked free-text search over id/title/summary.",
-            {
-                "value": {"type": "string", "description": "the query text"},
-                "token": tok,
-            },
-            ["value", "token"],
-        ),
-        _tool(
-            "cite",
-            "Citations only for a query (kind + its args, as query_*).",
-            {
-                "kind": {
-                    "type": "string",
-                    "description": "id|status|kind|cross_ref|text",
-                },
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": tok,
-            },
-            ["kind", "token"],
-        ),
-        _tool(
-            "explain",
-            "EXPLAIN trace only for a query (kind + its args, as query_*).",
-            {
-                "kind": {"type": "string"},
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": tok,
-            },
-            ["kind", "token"],
-        ),
-        _tool(
-            "refresh",
-            "Reload the served index from disk (requires the `refresh` scope).",
-            {"token": tok},
-            ["token"],
-        ),
-    ]
+    """The `tools/list` descriptors, derived from [`TOOL_REGISTRY`] in registration order."""
+    return [spec.descriptor() for spec in TOOL_REGISTRY.values()]
