@@ -14,11 +14,11 @@
 | Anchor | Kind | Id | Title | File:Line | Status | Summary |
 |---|---|---|---|---|---|---|
 | `agents` | other | — | AGENTS.md — tero-mcp | `AGENTS.md:2` | — | Use Tero + cabal-devmelopner for work here. |
-| `agents--tero-layer-1-corpus-index` | section | — | Tero (Layer-1 corpus index) | `AGENTS.md:6` | — | Repo has docs/tero-index/index.json (generated/ refreshed via tero-mcp/scripts/generateliteindex.py). |
-| `agents--agent-with-context` | other | — | agent with context: | `AGENTS.md:18` | — | uv run --project ../cabal-devmelopner cabal-devmelopner "task description here" --use-tero |
-| `agents--working-with-cabal-devmelopner-agent-tool` | section | — | Working with cabal-devmelopner agent tool | `AGENTS.md:24` | — | This project is prepared for integration: |
-| `agents--local-checks` | section | — | Local checks | `AGENTS.md:36` | — | Look for: |
-| `agents--further-reading` | section | — | Further reading | `AGENTS.md:44` | — | - README.md |
+| `agents--tero-layer-1-corpus-index` | section | — | Tero (Layer-1 corpus index) | `AGENTS.md:8` | — | Repo has docs/tero-index/index.json (generated/ refreshed via tero-mcp/scripts/generateliteindex.py). |
+| `agents--agent-with-context` | other | — | agent with context: | `AGENTS.md:20` | — | uv run --project ../cabal-devmelopner cabal-devmelopner "task description here" --use-tero |
+| `agents--working-with-cabal-devmelopner-agent-tool` | section | — | Working with cabal-devmelopner agent tool | `AGENTS.md:26` | — | This project is prepared for integration: |
+| `agents--local-checks` | section | — | Local checks | `AGENTS.md:38` | — | Look for: |
+| `agents--further-reading` | section | — | Further reading | `AGENTS.md:46` | — | - README.md |
 | `generating-an-index` | section | — | Generating a Tero index for any repo | `GENERATING-AN-INDEX.md:1` | — | tero-mcp-lite is a server, not a builder — it only ever reads a committed index.json. This |
 | `generating-an-index--where-the-schema-comes-from` | section | — | Where the schema comes from | `GENERATING-AN-INDEX.md:7` | — | The schema below is exactly what crates/mycelium-tero's Rust tero-index binary emits for Mycelium |
 | `generating-an-index--top-level-shape` | section | — | Top-level shape | `GENERATING-AN-INDEX.md:14` | — | { |
@@ -27,19 +27,19 @@
 | `generating-an-index--minimal-example-hand-written-no-builder-needed` | section | — | Minimal example (hand-written, no builder needed) | `GENERATING-AN-INDEX.md:97` | — | { |
 | `generating-an-index--producing-one-for-real` | section | — | Producing one for real | `GENERATING-AN-INDEX.md:123` | — | Two supported paths: |
 | `readme` | other | — | tero-mcp-lite | `README.md:1` | — | A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json — |
-| `readme--what-it-is-isnt` | section | — | What it is / isn't | `README.md:15` | — | - Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Five query |
-| `readme--install` | section | — | Install | `README.md:26` | — | Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/). |
-| `readme--register-in-.mcp.json-persistent-use-in-this-repo` | section | — | Register in `.mcp.json` (persistent use in this repo) | `README.md:54` | — | The repo-root .mcp.json already registers a tero server (see the top-level file). The entry: |
-| `readme--auth` | section | — | Auth | `README.md:80` | — | Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) — |
-| `readme--generating-an-index-for-any-repo` | section | — | Generating an index for any repo | `README.md:88` | — | See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to |
-| `readme--matching-the-rust-server` | section | — | Matching the Rust server | `README.md:94` | — | This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine |
-| `readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk` | section | — | Why a minimal implementation instead of the official `mcp` Python SDK | `README.md:134` | — | The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it |
-| `readme--adding-a-new-tool-the-registry-pattern` | section | — | Adding a new tool (the registry pattern) | `README.md:159` | — | src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's |
-| `readme--tests` | section | — | Tests | `README.md:195` | — | uv run pytest |
-| `readme--framework-remaining-tasks` | section | — | Framework — remaining tasks | `README.md:207` | — | A checklist for whoever picks this up next (in this repo or an extracted one): |
-| `readme--contact` | section | — | Contact | `README.md:244` | — | Maintainer contact for this package: |
-| `readme--license` | section | — | License | `README.md:251` | — | MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING |
-| `readme--status-roadmap` | section | — | Status & roadmap | `README.md:257` | — | - [Assessment & gaps](docs/ASSESSMENT.md) |
+| `readme--what-it-is-isnt` | section | — | What it is / isn't | `README.md:15` | — | - Is: the MCP presenter (Python) that dynamically discovers the tool surface, args, inputSchemas (Rust strong types as hints) and categories from the tero-rs b… |
+| `readme--install` | section | — | Install | `README.md:23` | — | Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/). |
+| `readme--register-in-.mcp.json-persistent-use-in-this-repo` | section | — | Register in `.mcp.json` (persistent use in this repo) | `README.md:51` | — | The repo-root .mcp.json already registers a tero server (see the top-level file). The entry: |
+| `readme--auth` | section | — | Auth | `README.md:77` | — | Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) — |
+| `readme--generating-an-index-for-any-repo` | section | — | Generating an index for any repo | `README.md:85` | — | See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to |
+| `readme--matching-the-rust-server` | section | — | Matching the Rust server | `README.md:91` | — | This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine |
+| `readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk` | section | — | Why a minimal implementation instead of the official `mcp` Python SDK | `README.md:131` | — | The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it |
+| `readme--adding-a-new-tool-the-registry-pattern` | section | — | Adding a new tool (the registry pattern) | `README.md:156` | — | src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's |
+| `readme--tests` | section | — | Tests | `README.md:192` | — | uv run pytest |
+| `readme--framework-remaining-tasks` | section | — | Framework — remaining tasks | `README.md:204` | — | A checklist for whoever picks this up next (in this repo or an extracted one): |
+| `readme--contact` | section | — | Contact | `README.md:243` | — | Maintainer contact for this package: |
+| `readme--license` | section | — | License | `README.md:250` | — | MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING |
+| `readme--status-roadmap` | section | — | Status & roadmap | `README.md:256` | — | - [Assessment & gaps](docs/ASSESSMENT.md) |
 | `assessment` | note | — | tero-mcp — Assessment & Gap Analysis | `docs/ASSESSMENT.md:1` | — | Date: 2026-07-08 |
 | `assessment--1.-what-this-project-is` | section | — | 1. What this project is | `docs/ASSESSMENT.md:10` | — | A lightweight MCP stdio front over a pre-built Tero-shaped index.json: |
 | `assessment--2.-current-maturity` | section | — | 2. Current maturity | `docs/ASSESSMENT.md:21` | — | Overall for L1 MCP: 4 / 5 — ready for production as L1 cited memory. |

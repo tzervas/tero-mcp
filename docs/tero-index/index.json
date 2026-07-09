@@ -19,7 +19,7 @@
       "kind": "section",
       "title": "Tero (Layer-1 corpus index)",
       "file": "AGENTS.md",
-      "line": 6,
+      "line": 8,
       "tag": "Empirical/Declared",
       "summary": "Repo has docs/tero-index/index.json (generated/ refreshed via tero-mcp/scripts/generateliteindex.py)."
     },
@@ -29,7 +29,7 @@
       "kind": "other",
       "title": "agent with context:",
       "file": "AGENTS.md",
-      "line": 18,
+      "line": 20,
       "tag": "Empirical/Declared",
       "summary": "uv run --project ../cabal-devmelopner cabal-devmelopner \"task description here\" --use-tero"
     },
@@ -39,7 +39,7 @@
       "kind": "section",
       "title": "Working with cabal-devmelopner agent tool",
       "file": "AGENTS.md",
-      "line": 24,
+      "line": 26,
       "tag": "Empirical/Declared",
       "summary": "This project is prepared for integration:"
     },
@@ -49,7 +49,7 @@
       "kind": "section",
       "title": "Local checks",
       "file": "AGENTS.md",
-      "line": 36,
+      "line": 38,
       "tag": "Empirical/Declared",
       "summary": "Look for:"
     },
@@ -59,7 +59,7 @@
       "kind": "section",
       "title": "Further reading",
       "file": "AGENTS.md",
-      "line": 44,
+      "line": 46,
       "tag": "Empirical/Declared",
       "summary": "- README.md"
     },
@@ -151,7 +151,7 @@
       "file": "README.md",
       "line": 15,
       "tag": "Empirical/Declared",
-      "summary": "- Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Five query"
+      "summary": "- Is: the MCP presenter (Python) that dynamically discovers the tool surface, args, inputSchemas (Rust strong types as hints) and categories from the tero-rs b…"
     },
     {
       "anchor": "readme--install",
@@ -159,7 +159,7 @@
       "kind": "section",
       "title": "Install",
       "file": "README.md",
-      "line": 26,
+      "line": 23,
       "tag": "Empirical/Declared",
       "summary": "Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/)."
     },
@@ -169,7 +169,7 @@
       "kind": "section",
       "title": "Register in `.mcp.json` (persistent use in this repo)",
       "file": "README.md",
-      "line": 54,
+      "line": 51,
       "tag": "Empirical/Declared",
       "summary": "The repo-root .mcp.json already registers a tero server (see the top-level file). The entry:"
     },
@@ -179,7 +179,7 @@
       "kind": "section",
       "title": "Auth",
       "file": "README.md",
-      "line": 80,
+      "line": 77,
       "tag": "Empirical/Declared",
       "summary": "Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) —"
     },
@@ -189,7 +189,7 @@
       "kind": "section",
       "title": "Generating an index for any repo",
       "file": "README.md",
-      "line": 88,
+      "line": 85,
       "tag": "Empirical/Declared",
       "summary": "See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to"
     },
@@ -199,7 +199,7 @@
       "kind": "section",
       "title": "Matching the Rust server",
       "file": "README.md",
-      "line": 94,
+      "line": 91,
       "tag": "Empirical/Declared",
       "summary": "This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine"
     },
@@ -209,7 +209,7 @@
       "kind": "section",
       "title": "Why a minimal implementation instead of the official `mcp` Python SDK",
       "file": "README.md",
-      "line": 134,
+      "line": 131,
       "tag": "Empirical/Declared",
       "summary": "The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it"
     },
@@ -219,7 +219,7 @@
       "kind": "section",
       "title": "Adding a new tool (the registry pattern)",
       "file": "README.md",
-      "line": 159,
+      "line": 156,
       "tag": "Empirical/Declared",
       "summary": "src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's"
     },
@@ -229,7 +229,7 @@
       "kind": "section",
       "title": "Tests",
       "file": "README.md",
-      "line": 195,
+      "line": 192,
       "tag": "Empirical/Declared",
       "summary": "uv run pytest"
     },
@@ -239,7 +239,7 @@
       "kind": "section",
       "title": "Framework — remaining tasks",
       "file": "README.md",
-      "line": 207,
+      "line": 204,
       "tag": "Empirical/Declared",
       "summary": "A checklist for whoever picks this up next (in this repo or an extracted one):"
     },
@@ -249,7 +249,7 @@
       "kind": "section",
       "title": "Contact",
       "file": "README.md",
-      "line": 244,
+      "line": 243,
       "tag": "Empirical/Declared",
       "summary": "Maintainer contact for this package:"
     },
@@ -259,7 +259,7 @@
       "kind": "section",
       "title": "License",
       "file": "README.md",
-      "line": 251,
+      "line": 250,
       "tag": "Empirical/Declared",
       "summary": "MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING"
     },
@@ -269,7 +269,7 @@
       "kind": "section",
       "title": "Status & roadmap",
       "file": "README.md",
-      "line": 257,
+      "line": 256,
       "tag": "Empirical/Declared",
       "summary": "- [Assessment & gaps](docs/ASSESSMENT.md)"
     },
