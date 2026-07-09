@@ -5,3 +5,12 @@
 .venv-check/
 .venv/
 __pycache__/
+
+# Build artifacts (rust subcrate + python)
+**/target/
+target/
+*.pyc
+__pycache__/
+*.egg-info/
+.venv/
+
