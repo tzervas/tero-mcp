@@ -1,0 +1,21 @@
+name: CI
+
+# Manual only — run the same checks locally via ./scripts/check.sh
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Local-parity checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Local-parity checks
+        run: bash scripts/check.sh
