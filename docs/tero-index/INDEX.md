@@ -3,13 +3,13 @@
 > **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-09.
 > Use this index to find where to Read, not as authoritative ground truth.
 
-- **Items:** 39
+- **Items:** 49
 - **Flagged:** 0
 - **item_tag:** `Empirical/Declared`
 - **Machine index:** [`index.json`](./index.json)
 - **Manifest:** [`MANIFEST.toml`](./MANIFEST.toml)
 
-## doc (39 entries)
+## doc (49 entries)
 
 | Anchor | Kind | Id | Title | File:Line | Status | Summary |
 |---|---|---|---|---|---|---|
@@ -41,6 +41,12 @@
 | `assessment--4.-gaps` | section | — | 4. Gaps | `docs/ASSESSMENT.md:48` | — | — |
 | `assessment--5.-integration-fit-cabal-devmelopner` | section | — | 5. Integration fit (cabal-devmelopner) | `docs/ASSESSMENT.md:61` | — | Cabal already wires opt-in --use-tero / USETERO; must surface errors (not silent pass). |
 | `assessment--6.-related-docs` | section | — | 6. Related docs | `docs/ASSESSMENT.md:73` | — | - [ROADMAP.md](ROADMAP.md) — waves + API plan |
+| `localchecks` | section | — | Local checks (CI parity) | `docs/LOCAL_CHECKS.md:1` | — | GitHub Actions workflows in this repo are manual only (workflowdispatch). |
+| `localchecks--run-everything-the-remote-job-would-run` | section | — | Run everything the remote job would run | `docs/LOCAL_CHECKS.md:6` | — | ./scripts/check.sh |
+| `localchecks--tero-index` | section | — | Tero index | `docs/LOCAL_CHECKS.md:19` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root "$(pwd)" |
+| `localchecks--from-a-checkout-that-can-see-the-generator-sibling-tero-mcp-recommended` | other | — | from a checkout that can see the generator (sibling tero-mcp recommended): | `docs/LOCAL_CHECKS.md:22` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root "$(pwd)" |
+| `localchecks--or` | other | — | or: | `docs/LOCAL_CHECKS.md:24` | — | python3 scripts/generateteroindex.sh   # if present as a thin wrapper |
+| `localchecks--remote-optional` | section | — | Remote (optional) | `docs/LOCAL_CHECKS.md:30` | — | In GitHub: Actions → CI → Run workflow. |
 | `roadmap` | note | — | tero-mcp — Product Roadmap | `docs/ROADMAP.md:1` | Living (2026-07-08) | Status: Living (2026-07-08) |
 | `roadmap--waves` | section | — | Waves | `docs/ROADMAP.md:10` | — | — |
 | `roadmap--wave-0-hygiene-now` | section | — | Wave 0 — Hygiene (now) | `docs/ROADMAP.md:12` | — | — |
@@ -52,4 +58,8 @@
 | `roadmap--non-goals` | section | — | Non-goals | `docs/ROADMAP.md:66` | — | - Building the index inside this process |
 | `roadmap--pr-plan-suggested` | section | — | PR plan (suggested) | `docs/ROADMAP.md:74` | — | 1. docs: assessment + roadmap (this change) |
 | `roadmap--success-metrics` | section | — | Success metrics | `docs/ROADMAP.md:84` | — | — |
+| `readme-2` | other | — | Tero index (Layer 1) | `docs/tero-index/README.md:1` | — | Machine + human citation index for this repository. |
+| `readme--regenerate` | section | — | Regenerate | `docs/tero-index/README.md:13` | — | python3 /path/to/tero-mcp/scripts/generateliteindex.py --root $(pwd) |
+| `readme--or-if-tero-mcp-is-a-sibling` | other | — | or if tero-mcp is a sibling: | `docs/tero-index/README.md:17` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root $(pwd) |
+| `readme--serve-locally` | section | — | Serve locally | `docs/tero-index/README.md:21` | — | export TEROTOKENS=local-dev:refresh |
 
