@@ -1,0 +1,393 @@
+{
+  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-09.",
+  "item_tag": "Empirical/Declared",
+  "siblings": [],
+  "items": [
+    {
+      "anchor": "generating-an-index",
+      "family": "doc",
+      "kind": "section",
+      "title": "Generating a Tero index for any repo",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "summary": "tero-mcp-lite is a server, not a builder — it only ever reads a committed index.json. This"
+    },
+    {
+      "anchor": "generating-an-index--where-the-schema-comes-from",
+      "family": "doc",
+      "kind": "section",
+      "title": "Where the schema comes from",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 7,
+      "tag": "Empirical/Declared",
+      "summary": "The schema below is exactly what crates/mycelium-tero's Rust tero-index binary emits for Mycelium"
+    },
+    {
+      "anchor": "generating-an-index--top-level-shape",
+      "family": "doc",
+      "kind": "section",
+      "title": "Top-level shape",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 14,
+      "tag": "Empirical/Declared",
+      "summary": "{"
+    },
+    {
+      "anchor": "generating-an-index--one-item-row",
+      "family": "doc",
+      "kind": "section",
+      "title": "One item row",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 42,
+      "tag": "Empirical/Declared",
+      "summary": "{"
+    },
+    {
+      "anchor": "generating-an-index--canonical-sort-order",
+      "family": "doc",
+      "kind": "section",
+      "title": "Canonical sort order",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 82,
+      "tag": "Empirical/Declared",
+      "summary": "The committed items array must already be sorted by (family, file, line, anchor), where"
+    },
+    {
+      "anchor": "generating-an-index--minimal-example-hand-written-no-builder-needed",
+      "family": "doc",
+      "kind": "section",
+      "title": "Minimal example (hand-written, no builder needed)",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 97,
+      "tag": "Empirical/Declared",
+      "summary": "{"
+    },
+    {
+      "anchor": "generating-an-index--producing-one-for-real",
+      "family": "doc",
+      "kind": "section",
+      "title": "Producing one for real",
+      "file": "GENERATING-AN-INDEX.md",
+      "line": 123,
+      "tag": "Empirical/Declared",
+      "summary": "Two supported paths:"
+    },
+    {
+      "anchor": "readme",
+      "family": "doc",
+      "kind": "other",
+      "title": "tero-mcp-lite",
+      "file": "README.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "summary": "A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json —"
+    },
+    {
+      "anchor": "readme--what-it-is-isnt",
+      "family": "doc",
+      "kind": "section",
+      "title": "What it is / isn't",
+      "file": "README.md",
+      "line": 15,
+      "tag": "Empirical/Declared",
+      "summary": "- Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Five query"
+    },
+    {
+      "anchor": "readme--install",
+      "family": "doc",
+      "kind": "section",
+      "title": "Install",
+      "file": "README.md",
+      "line": 26,
+      "tag": "Empirical/Declared",
+      "summary": "Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/)."
+    },
+    {
+      "anchor": "readme--register-in-.mcp.json-persistent-use-in-this-repo",
+      "family": "doc",
+      "kind": "section",
+      "title": "Register in `.mcp.json` (persistent use in this repo)",
+      "file": "README.md",
+      "line": 54,
+      "tag": "Empirical/Declared",
+      "summary": "The repo-root .mcp.json already registers a tero server (see the top-level file). The entry:"
+    },
+    {
+      "anchor": "readme--auth",
+      "family": "doc",
+      "kind": "section",
+      "title": "Auth",
+      "file": "README.md",
+      "line": 80,
+      "tag": "Empirical/Declared",
+      "summary": "Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) —"
+    },
+    {
+      "anchor": "readme--generating-an-index-for-any-repo",
+      "family": "doc",
+      "kind": "section",
+      "title": "Generating an index for any repo",
+      "file": "README.md",
+      "line": 88,
+      "tag": "Empirical/Declared",
+      "summary": "See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to"
+    },
+    {
+      "anchor": "readme--matching-the-rust-server",
+      "family": "doc",
+      "kind": "section",
+      "title": "Matching the Rust server",
+      "file": "README.md",
+      "line": 94,
+      "tag": "Empirical/Declared",
+      "summary": "This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine"
+    },
+    {
+      "anchor": "readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk",
+      "family": "doc",
+      "kind": "section",
+      "title": "Why a minimal implementation instead of the official `mcp` Python SDK",
+      "file": "README.md",
+      "line": 134,
+      "tag": "Empirical/Declared",
+      "summary": "The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it"
+    },
+    {
+      "anchor": "readme--adding-a-new-tool-the-registry-pattern",
+      "family": "doc",
+      "kind": "section",
+      "title": "Adding a new tool (the registry pattern)",
+      "file": "README.md",
+      "line": 159,
+      "tag": "Empirical/Declared",
+      "summary": "src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's"
+    },
+    {
+      "anchor": "readme--tests",
+      "family": "doc",
+      "kind": "section",
+      "title": "Tests",
+      "file": "README.md",
+      "line": 195,
+      "tag": "Empirical/Declared",
+      "summary": "uv run pytest"
+    },
+    {
+      "anchor": "readme--framework-remaining-tasks",
+      "family": "doc",
+      "kind": "section",
+      "title": "Framework — remaining tasks",
+      "file": "README.md",
+      "line": 207,
+      "tag": "Empirical/Declared",
+      "summary": "A checklist for whoever picks this up next (in this repo or an extracted one):"
+    },
+    {
+      "anchor": "readme--contact",
+      "family": "doc",
+      "kind": "section",
+      "title": "Contact",
+      "file": "README.md",
+      "line": 244,
+      "tag": "Empirical/Declared",
+      "summary": "Maintainer contact for this package:"
+    },
+    {
+      "anchor": "readme--license",
+      "family": "doc",
+      "kind": "section",
+      "title": "License",
+      "file": "README.md",
+      "line": 251,
+      "tag": "Empirical/Declared",
+      "summary": "MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING"
+    },
+    {
+      "anchor": "readme--status-roadmap",
+      "family": "doc",
+      "kind": "section",
+      "title": "Status & roadmap",
+      "file": "README.md",
+      "line": 257,
+      "tag": "Empirical/Declared",
+      "summary": "- [Assessment & gaps](docs/ASSESSMENT.md)"
+    },
+    {
+      "anchor": "assessment",
+      "family": "doc",
+      "kind": "note",
+      "title": "tero-mcp — Assessment & Gap Analysis",
+      "file": "docs/ASSESSMENT.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "summary": "Date: 2026-07-08"
+    },
+    {
+      "anchor": "assessment--1.-what-this-project-is",
+      "family": "doc",
+      "kind": "section",
+      "title": "1. What this project is",
+      "file": "docs/ASSESSMENT.md",
+      "line": 10,
+      "tag": "Empirical/Declared",
+      "summary": "A lightweight MCP stdio front over a pre-built Tero-shaped index.json:"
+    },
+    {
+      "anchor": "assessment--2.-current-maturity",
+      "family": "doc",
+      "kind": "section",
+      "title": "2. Current maturity",
+      "file": "docs/ASSESSMENT.md",
+      "line": 21,
+      "tag": "Empirical/Declared",
+      "summary": "Overall for L1 MCP: 4 / 5 — ready for production as L1 cited memory."
+    },
+    {
+      "anchor": "assessment--3.-branch-in-flight-work",
+      "family": "doc",
+      "kind": "section",
+      "title": "3. Branch / in-flight work",
+      "file": "docs/ASSESSMENT.md",
+      "line": 36,
+      "tag": "Empirical/Declared",
+      "summary": "No blocking paused feature work for L1."
+    },
+    {
+      "anchor": "assessment--4.-gaps",
+      "family": "doc",
+      "kind": "section",
+      "title": "4. Gaps",
+      "file": "docs/ASSESSMENT.md",
+      "line": 48,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "assessment--5.-integration-fit-cabal-devmelopner",
+      "family": "doc",
+      "kind": "section",
+      "title": "5. Integration fit (cabal-devmelopner)",
+      "file": "docs/ASSESSMENT.md",
+      "line": 61,
+      "tag": "Empirical/Declared",
+      "summary": "Cabal already wires opt-in --use-tero / USETERO; must surface errors (not silent pass)."
+    },
+    {
+      "anchor": "assessment--6.-related-docs",
+      "family": "doc",
+      "kind": "section",
+      "title": "6. Related docs",
+      "file": "docs/ASSESSMENT.md",
+      "line": 73,
+      "tag": "Empirical/Declared",
+      "summary": "- [ROADMAP.md](ROADMAP.md) — waves + API plan"
+    },
+    {
+      "anchor": "roadmap",
+      "family": "doc",
+      "kind": "note",
+      "title": "tero-mcp — Product Roadmap",
+      "file": "docs/ROADMAP.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "status": "Living (2026-07-08)",
+      "summary": "Status: Living (2026-07-08)"
+    },
+    {
+      "anchor": "roadmap--waves",
+      "family": "doc",
+      "kind": "section",
+      "title": "Waves",
+      "file": "docs/ROADMAP.md",
+      "line": 10,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "roadmap--wave-0-hygiene-now",
+      "family": "doc",
+      "kind": "section",
+      "title": "Wave 0 — Hygiene (now)",
+      "file": "docs/ROADMAP.md",
+      "line": 12,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "roadmap--wave-1-client-session-ergonomics",
+      "family": "doc",
+      "kind": "section",
+      "title": "Wave 1 — Client & session ergonomics",
+      "file": "docs/ROADMAP.md",
+      "line": 21,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "roadmap--wave-2-api-surfaces-m-1017-alignment",
+      "family": "doc",
+      "kind": "section",
+      "title": "Wave 2 — API surfaces (M-1017 alignment)",
+      "file": "docs/ROADMAP.md",
+      "line": 29,
+      "tag": "Empirical/Declared",
+      "id": "M-1017"
+    },
+    {
+      "anchor": "roadmap--mcp-tools-stable-freeze-unless-version-bump",
+      "family": "doc",
+      "kind": "section",
+      "title": "MCP tools (stable — freeze unless version bump)",
+      "file": "docs/ROADMAP.md",
+      "line": 31,
+      "tag": "Empirical/Declared",
+      "summary": "Auth: TEROTOKENS table; every call requires token arg matching scope (read / refresh)."
+    },
+    {
+      "anchor": "roadmap--planned-http-front-wave-2",
+      "family": "doc",
+      "kind": "section",
+      "title": "Planned HTTP front (Wave 2)",
+      "file": "docs/ROADMAP.md",
+      "line": 45,
+      "tag": "Empirical/Declared",
+      "summary": "Optional OpenAPI stub for curl/Grok non-MCP hosts."
+    },
+    {
+      "anchor": "roadmap--wave-3-ecosystem",
+      "family": "doc",
+      "kind": "section",
+      "title": "Wave 3 — Ecosystem",
+      "file": "docs/ROADMAP.md",
+      "line": 55,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "roadmap--non-goals",
+      "family": "doc",
+      "kind": "section",
+      "title": "Non-goals",
+      "file": "docs/ROADMAP.md",
+      "line": 66,
+      "tag": "Empirical/Declared",
+      "summary": "- Building the index inside this process"
+    },
+    {
+      "anchor": "roadmap--pr-plan-suggested",
+      "family": "doc",
+      "kind": "section",
+      "title": "PR plan (suggested)",
+      "file": "docs/ROADMAP.md",
+      "line": 74,
+      "tag": "Empirical/Declared",
+      "summary": "1. docs: assessment + roadmap (this change)"
+    },
+    {
+      "anchor": "roadmap--success-metrics",
+      "family": "doc",
+      "kind": "section",
+      "title": "Success metrics",
+      "file": "docs/ROADMAP.md",
+      "line": 84,
+      "tag": "Empirical/Declared"
+    }
+  ],
+  "flagged": []
+}
