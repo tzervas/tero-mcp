@@ -22,12 +22,11 @@ from tero_mcp_lite.auth import AuthError, Scope
 from tero_mcp_lite.core import FrontError
 from tero_mcp_lite.mcp_server import TOOL_REGISTRY, _tool_descriptors
 
-# ── tool descriptors — transcribed from front/mcp.rs::tool_descriptors() ──────────────────────────
+# ── tool descriptors — transcribed from front/mcp.rs::tool_descriptors() (with categories) ────────
 #
-# Field order matters here (not just value equality): `json!` macro literals in the Rust source
-# preserve the written key order (serde_json's `preserve_order` feature), and `ToolSpec.descriptor`
-# builds the same {name, description, inputSchema: {type, properties, required}} shape in the same
-# order — see the json.dumps() round-trip comparison in test_tool_descriptor_order_matches_rust.
+# Categories (introspection/query/explain/maintenance) are part of the dynamic surface
+# (exposed by --describe and tools/list). Field order matches Rust json! exactly.
+# See tero-rs/crates/mycelium-tero/src/front/mcp.rs and workspace tero polish (tpol).
 
 _TOK = {"type": "string", "description": "bearer token (from TERO_TOKENS)"}
 
@@ -35,6 +34,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "identify",
         "description": "Server identity, version, and whether the Layer-2 gate is open.",
+        "category": "introspection",
         "inputSchema": {
             "type": "object",
             "properties": {"token": _TOK},
@@ -44,6 +44,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "query_by_id",
         "description": "Exact lookup by corpus id (RFC-0034, M-1015, DN-87, an issue id).",
+        "category": "query",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -57,6 +58,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
         "name": "query_by_status",
         # Rust source literally uses the Unicode ellipsis character U+2026, not ASCII "...".
         "description": "All rows with a given status (Accepted, todo, done, …).",
+        "category": "query",
         "inputSchema": {
             "type": "object",
             "properties": {"value": {"type": "string"}, "token": _TOK},
@@ -66,6 +68,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "query_by_kind",
         "description": "All rows of a given kind (rfc, adr, note, issue, section, …).",
+        "category": "query",
         "inputSchema": {
             "type": "object",
             "properties": {"value": {"type": "string"}, "token": _TOK},
@@ -75,6 +78,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "cross_ref",
         "description": "Breadth-first walk of depends_on/doc_refs edges from a start id/anchor.",
+        "category": "query",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -88,6 +92,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "text_search",
         "description": "Ranked free-text search over id/title/summary.",
+        "category": "query",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -100,6 +105,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "cite",
         "description": "Citations only for a query (kind + its args, as query_*).",
+        "category": "explain",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -118,6 +124,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "explain",
         "description": "EXPLAIN trace only for a query (kind + its args, as query_*).",
+        "category": "explain",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -133,6 +140,7 @@ RUST_TOOL_DESCRIPTORS: list[dict] = [
     {
         "name": "refresh",
         "description": "Reload the served index from disk (requires the `refresh` scope).",
+        "category": "maintenance",
         "inputSchema": {
             "type": "object",
             "properties": {"token": _TOK},
@@ -154,7 +162,7 @@ def test_tool_descriptor_values_match_rust() -> None:
 def test_tool_descriptor_order_matches_rust() -> None:
     """Value equality (above) doesn't catch key-order drift (dict `==` ignores order) — a
     `json.dumps` round trip with `sort_keys=False` does, matching how `serde_json`'s
-    `preserve_order` feature renders the Rust `json!` literals.
+    `preserve_order` feature renders the Rust `json!` literals (incl. "category").
     """
     actual = json.dumps(_tool_descriptors(), sort_keys=False)
     expected = json.dumps(RUST_TOOL_DESCRIPTORS, sort_keys=False)

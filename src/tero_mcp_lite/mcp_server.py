@@ -68,6 +68,8 @@ class ToolSpec:
     `tools/list`'s descriptor and `tools/call`'s dispatch + auth-scope check are both derived from
     this (see [`_tool_descriptors`] / [`_handle_tools_call`]) — registering a tool means adding one
     `ToolSpec` to [`TOOL_REGISTRY`], nothing else.
+
+    Category (introspection/query/explain/maintenance) enables dynamic grouped surface.
     """
 
     name: str
@@ -76,12 +78,14 @@ class ToolSpec:
     required: tuple[str, ...]
     handler: ToolHandler
     scope: Scope = Scope.READ
+    category: str = "query"
 
     def descriptor(self) -> dict[str, Any]:
-        """The `tools/list` JSON descriptor for this tool."""
+        """The `tools/list` JSON descriptor for this tool. Includes category for dynamic surface."""
         return {
             "name": self.name,
             "description": self.description,
+            "category": self.category,
             "inputSchema": {
                 "type": "object",
                 "properties": self.properties,
@@ -158,6 +162,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             properties={"token": TOKEN_ARG},
             required=("token",),
             handler=_handle_identify,
+            category="introspection",
         ),
         ToolSpec(
             name="query_by_id",
@@ -168,6 +173,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             },
             required=("value", "token"),
             handler=_fixed_kind_handler("id", VIEW_FULL),
+            category="query",
         ),
         ToolSpec(
             name="query_by_status",
@@ -175,6 +181,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             properties={"value": {"type": "string"}, "token": TOKEN_ARG},
             required=("value", "token"),
             handler=_fixed_kind_handler("status", VIEW_FULL),
+            category="query",
         ),
         ToolSpec(
             name="query_by_kind",
@@ -184,6 +191,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             properties={"value": {"type": "string"}, "token": TOKEN_ARG},
             required=("value", "token"),
             handler=_fixed_kind_handler("kind", VIEW_FULL),
+            category="query",
         ),
         ToolSpec(
             name="cross_ref",
@@ -195,6 +203,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             },
             required=("start", "token"),
             handler=_fixed_kind_handler("cross_ref", VIEW_FULL),
+            category="query",
         ),
         ToolSpec(
             name="text_search",
@@ -205,6 +214,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             },
             required=("value", "token"),
             handler=_fixed_kind_handler("text", VIEW_FULL),
+            category="query",
         ),
         ToolSpec(
             name="cite",
@@ -221,6 +231,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             },
             required=("kind", "token"),
             handler=_arg_kind_handler(VIEW_CITE),
+            category="explain",
         ),
         ToolSpec(
             name="explain",
@@ -234,6 +245,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             },
             required=("kind", "token"),
             handler=_arg_kind_handler(VIEW_EXPLAIN),
+            category="explain",
         ),
         ToolSpec(
             name="refresh",
@@ -242,6 +254,7 @@ def _build_registry() -> dict[str, ToolSpec]:
             required=("token",),
             handler=_handle_refresh,
             scope=required_scope("refresh"),
+            category="maintenance",
         ),
     ]
     return {spec.name: spec for spec in specs}

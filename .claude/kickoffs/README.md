@@ -1,11 +1,18 @@
-# $repo local kickoffs
+# tero-mcp local kickoffs (leaf under wsfull orchestrator)
 
-Main brief: root `.claude/kickoffs/` (e.g. wsfull.md for workspace vision, cab.md etc for this repo's gaps).
+This is a **leaf kickoff** managed by the central workspace orchestrator (`wsfull`).
 
-This repo participates in the workspace kickoff framework:
-- Tero-first research (categories for scoping)
-- dev-workflow, guards
-- PRs to dev, wave for disjoint
-- Doc automation before tero regen
+Main brief: root `tpol.md` + wsfull.md (orchestrator flow).
 
-See root .claude/kickoffs/README.md and the stowed briefs for full captured data (dynamic tero, common memory, local 5080 model routing, cost opt, orchestration vs leaves, etc.).
+**How wsfull directs this leaf**:
+- wsfull spawns one isolated worktree for you (worktree-guard).
+- Work on working branch inside the isolated tree.
+- Change-scoped work + tests + **early security scans** (patch vulns with available tools).
+- PR polished result to dev.
+- Orchestrator pulls into dev for wiring, runs integration/regression + security tests, then PRs fully integrated state to main.
+
+Includes tero-rs crate surface.
+
+Use dynamic --describe; categories; perf/chaos tests; self tero-index.
+
+Scripts in repo. PR to dev after change-scoped tests + security.
