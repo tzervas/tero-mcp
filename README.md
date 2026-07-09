@@ -253,3 +253,8 @@ Maintainer contact for this package:
 MIT — see the repository root `LICENSE` (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING
 §Licensing require MIT-only for first-party Mycelium artifacts, and this package inherits that
 posture as a Mycelium-repo artifact).
+
+## Status & roadmap
+
+- [Assessment & gaps](docs/ASSESSMENT.md)
+- [Product roadmap & API plans](docs/ROADMAP.md)
