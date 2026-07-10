@@ -111,8 +111,11 @@ def test_main_help_exits_ok(capsys: pytest.CaptureFixture[str]) -> None:
 def test_main_missing_index_exits_io(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Force the lite path (TERO_FORCE_LITE) so main() does NOT os.execv the discovered Rust binary
-    # in-process (which would hijack the test runner). Tokens present so we reach the index-load
+    # Force the lite path so main() does NOT os.execv the discovered Rust binary in-process (which
+    # would hijack the test runner). We set BOTH gates deliberately — they are independent:
+    # `TERO_FORCE_LITE` short-circuits `_resolve_rust_binary()` itself, and the `--lite` argv flag
+    # sets `ns.force_lite` in main(); either alone suffices, both together is intentional
+    # belt-and-suspenders (don't "simplify" one away). Tokens present so we reach the index-load
     # step rather than exiting EX_CONFIG first. A missing index must exit EX_IO, never-silent.
     monkeypatch.setenv("TERO_FORCE_LITE", "1")
     monkeypatch.setenv("TERO_TOKENS", "t:read")
@@ -138,9 +141,11 @@ def test_main_no_tokens_exits_config(
 
 
 def test_main_bad_arg_usage(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
-    # An unknown flag is rejected by argparse (SystemExit), caught by main(), and re-raised as the
-    # deterministic EX_USAGE exit with a usage line — never a silent accept. Force-lite so the
-    # discovery/exec path is never reached before the parse error.
+    # An unknown flag is rejected by argparse (SystemExit) at parse time — BEFORE main() reaches any
+    # Rust-binary discovery/exec — then caught by main() and re-raised as the deterministic EX_USAGE
+    # exit with a usage line, never a silent accept. (The parse error fires unconditionally; the
+    # force-lite env below is inert defense-in-depth here, not the load-bearing guard — it only
+    # matters for tests whose main() gets past argparse.)
     monkeypatch.setenv("TERO_FORCE_LITE", "1")
     with pytest.raises(SystemExit) as exc:
         main(["--this-flag-does-not-exist"])

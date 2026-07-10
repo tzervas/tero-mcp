@@ -585,7 +585,7 @@
       "kind": "section",
       "title": "Changed",
       "file": "CHANGELOG.md",
-      "line": 29,
+      "line": 31,
       "tag": "Empirical/Declared",
       "summary": "- Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts"
     },
@@ -595,9 +595,19 @@
       "kind": "section",
       "title": "Released",
       "file": "CHANGELOG.md",
-      "line": 37,
+      "line": 39,
       "tag": "Empirical/Declared",
-      "summary": "- First real package build: teromcplite-0.1.1 wheel (.whl) + sdist (.tar.gz) via uv build."
+      "summary": "This 0.1.1 release comprises:"
+    },
+    {
+      "anchor": "changelog--security",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Security",
+      "file": "CHANGELOG.md",
+      "line": 48,
+      "tag": "Empirical/Declared",
+      "summary": "- .gitallowed hardening. The git-secrets allow-list was rewritten to remove entries that"
     },
     {
       "anchor": "changelog--notes",
@@ -605,7 +615,7 @@
       "kind": "section",
       "title": "Notes",
       "file": "CHANGELOG.md",
-      "line": 43,
+      "line": 56,
       "tag": "Empirical/Declared",
       "summary": "- Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index"
     },
@@ -615,7 +625,7 @@
       "kind": "section",
       "title": "[0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline)",
       "file": "CHANGELOG.md",
-      "line": 49,
+      "line": 62,
       "tag": "Empirical/Declared",
       "summary": "Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md)."
     },
@@ -625,7 +635,7 @@
       "kind": "section",
       "title": "Notes on 1.0 path (not yet ready for 1.0.0)",
       "file": "CHANGELOG.md",
-      "line": 53,
+      "line": 66,
       "tag": "Empirical/Declared",
       "summary": "- Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary."
     },
@@ -635,7 +645,7 @@
       "kind": "section",
       "title": "This tranche work (appended)",
       "file": "CHANGELOG.md",
-      "line": 60,
+      "line": 73,
       "tag": "Empirical/Declared",
       "summary": "- Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items)."
     }
