@@ -18,13 +18,15 @@ First productionized release of the `tero-mcp` front. Bumped from 0.1.0 (semver 
   - WHY NOT 1.0.0: the maintainer's own 1.0-path criteria (below) are not all met (deeper hardening,
     a positive zero-gap cabal "ready" verdict). A fresh, honest 0.1.x release (v0.1.0 already
     tagged/published — non-destructive) is the correct step; 1.0 stays reserved (VR-5).
-- **Test-runner hang / backend isolation (WHAT):** two in-process `main()` wrapper tests
-  (`test_main_missing_index_exits_io`, `test_main_bad_arg_usage`) hung the whole suite in any
-  environment where the full-capability tero-rs Rust binary is discoverable — `main()` reached its
-  `os.execv` delegation and replaced the *pytest* process with the Rust MCP server, which then blocked
-  reading stdin. Both now force the lite path (`--lite` / `TERO_FORCE_LITE`) so the delegation/exec is
-  never triggered in-process; the Rust-vs-Python decision stays exercised by the *subprocess* e2e
-  tests (`_run_wrapper`), which correctly isolate the exec to a child.
+- **Test-runner hang / backend isolation (WHAT):** `test_main_missing_index_exits_io` hung the whole
+  suite in any environment where the full-capability tero-rs Rust binary is discoverable — the
+  in-process `main()` reached its `os.execv` delegation and replaced the *pytest* process with the
+  Rust MCP server, which then blocked reading stdin. (The sibling `test_main_bad_arg_usage` did not
+  execv-hang — `argparse` rejects its unknown flag *before* `main()` reaches binary discovery — its
+  real defect was a tautological `... or True` assertion; it is rewritten to a deterministic
+  EX_USAGE check.) Both in-process tests now force the lite path (`--lite` / `TERO_FORCE_LITE`) so the
+  delegation/exec is never triggered in-process; the Rust-vs-Python decision stays exercised by the
+  *subprocess* e2e tests (`_run_wrapper`), which correctly isolate the exec to a child.
 
 ### Changed
 - **Full-coverage assertion (maintainer requirement #1).** The Rust-delegation e2e test now asserts
@@ -35,10 +37,21 @@ First productionized release of the `tero-mcp` front. Bumped from 0.1.0 (semver 
   `"mycelium-tero"` pre-extraction); the delegation test asserts the current identity.
 
 ### Released
-- First real package build: **`tero_mcp_lite-0.1.1`** wheel (`.whl`) + sdist (`.tar.gz`) via `uv build`.
-- Published as a **GitHub Release** (`v0.1.1`, fresh tag — v0.1.0 preserved) with the wheel + sdist
-  attached (sha256-summed), **and** pushed to **`ghcr.io/tzervas/tero-mcp:0.1.1` + `:latest`** as an
-  OCI artifact via `oras` (GHCR is not a native PyPI registry — `oras` carries the actual package).
+This 0.1.1 release comprises:
+- First real package build — **`tero_mcp_lite-0.1.1`** wheel (`.whl`) + sdist (`.tar.gz`), built via
+  `uv build` and sha256-summed (`dist/SHA256SUMS.txt`).
+- A **GitHub Release** at the fresh `v0.1.1` tag (v0.1.0 preserved — non-destructive) with the wheel +
+  sdist attached.
+- A **GHCR OCI artifact** at **`ghcr.io/tzervas/tero-mcp:0.1.1` + `:latest`**, carrying the same
+  wheel + sdist via `oras` (GHCR is not a native PyPI registry — `oras` carries the actual package).
+
+### Security
+- **`.gitallowed` hardening.** The git-secrets allow-list was rewritten to remove entries that
+  silently blinded the scanner: `sk-[A-Za-z0-9]` (mirrored the prefix of the prohibited
+  `sk-[A-Za-z0-9]{20,}` value pattern) and the bare-name / name-with-equals entries (which
+  allow-listed a real name-equals-secret assignment). Allow entries are now scoped to *name mentions
+  only* (the name NOT followed by an equals sign). Verified with `git secrets --scan`: the repo scans
+  clean, documentation mentions pass, and a synthetic name-equals-secret assignment is still flagged.
 
 ### Notes
 - Test suite: **59 tests green** (`uv run pytest`), fully offline — synthetic in-memory index

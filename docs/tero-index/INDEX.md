@@ -3,7 +3,7 @@
 > **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.
 > Use this index to find where to Read, not as authoritative ground truth.
 
-- **Items:** 64
+- **Items:** 65
 - **Flagged:** 0
 - **item_tag:** `Empirical/Declared`
 - **Machine index:** [`index.json`](./index.json)
@@ -68,7 +68,7 @@
 | `readme--or-if-tero-mcp-is-a-sibling` | other | — | or if tero-mcp is a sibling: | `docs/tero-index/README.md:17` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root $(pwd) |
 | `readme--serve-locally` | section | — | Serve locally | `docs/tero-index/README.md:21` | — | export TEROTOKENS=local-dev:refresh |
 
-## changelog (10 entries)
+## changelog (11 entries)
 
 | Anchor | Kind | Id | Title | File:Line | Status | Summary |
 |---|---|---|---|---|---|---|
@@ -76,10 +76,11 @@
 | `changelog--unreleased` | section | — | [Unreleased] | `CHANGELOG.md:7` | — | First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline). |
 | `changelog--0.1.1-2026-07-10-tooling-1.0-readiness-wave-productionization-first-package-release` | section | — | [0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release) | `CHANGELOG.md:9` | — | First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline). |
 | `changelog--fixed` | section | — | Fixed | `CHANGELOG.md:13` | — | - Version reconciliation (WHAT): the working tree carried an inconsistent version |
-| `changelog--changed` | section | — | Changed | `CHANGELOG.md:29` | — | - Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts |
-| `changelog--released` | section | — | Released | `CHANGELOG.md:37` | — | - First real package build: teromcplite-0.1.1 wheel (.whl) + sdist (.tar.gz) via uv build. |
-| `changelog--notes` | section | — | Notes | `CHANGELOG.md:43` | — | - Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index |
-| `changelog--0.1.0-2026-07-10-tooling-1.0-readiness-wave-baseline` | section | — | [0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline) | `CHANGELOG.md:49` | — | Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md). |
-| `changelog--notes-on-1.0-path-not-yet-ready-for-1.0.0` | section | — | Notes on 1.0 path (not yet ready for 1.0.0) | `CHANGELOG.md:53` | — | - Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary. |
-| `changelog--this-tranche-work-appended` | section | — | This tranche work (appended) | `CHANGELOG.md:60` | — | - Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items). |
+| `changelog--changed` | section | — | Changed | `CHANGELOG.md:31` | — | - Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts |
+| `changelog--released` | section | — | Released | `CHANGELOG.md:39` | — | This 0.1.1 release comprises: |
+| `changelog--security` | section | — | Security | `CHANGELOG.md:48` | — | - .gitallowed hardening. The git-secrets allow-list was rewritten to remove entries that |
+| `changelog--notes` | section | — | Notes | `CHANGELOG.md:56` | — | - Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index |
+| `changelog--0.1.0-2026-07-10-tooling-1.0-readiness-wave-baseline` | section | — | [0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline) | `CHANGELOG.md:62` | — | Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md). |
+| `changelog--notes-on-1.0-path-not-yet-ready-for-1.0.0` | section | — | Notes on 1.0 path (not yet ready for 1.0.0) | `CHANGELOG.md:66` | — | - Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary. |
+| `changelog--this-tranche-work-appended` | section | — | This tranche work (appended) | `CHANGELOG.md:73` | — | - Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items). |
 

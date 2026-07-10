@@ -1,10 +1,15 @@
-# git-secrets allowed (false positive exceptions)
-# Variable *names* and example placeholders are OK; real values must never match prohibited patterns.
-XAI_API_KEY
-xai[_-]?api[_-]?key
-ANTHROPIC_API_KEY
-OPENAI_API_KEY
-sk-[A-Za-z0-9]
-123456789012
-XAI_API_KEY=
-ANTHROPIC_API_KEY=
+# git-secrets allow-list — SAFE, minimal exceptions (verified with `git secrets --scan`).
+#
+# INVARIANT: an allow entry must never whitelist a line that could carry a real secret VALUE.
+#   - We NEVER mirror a prohibited value pattern's matchable substring. (The old `sk-[A-Za-z0-9]`
+#     entry matched the prefix of ANY sk-prefixed string and thereby blinded the prohibited
+#     `sk-[A-Za-z0-9]{20,}` pattern — removed.)
+#   - We NEVER allow a `NAME`-equals-value assignment. (The old bare-name and name-with-equals
+#     entries allow-listed a real assignment of a key name to a secret value — removed.)
+# Only a documentation *mention* of a variable NAME — the name NOT immediately followed by an
+# equals sign — is exempted here, so prose that names a key (e.g. ".env files contain XAI_API_KEY
+# (...)", or "git secrets --add 'XAI_API_KEY'") passes the scan, while a real name-equals-secret
+# assignment stays flagged. Verified: a synthetic assignment with a realistic secret is caught.
+XAI_API_KEY([^=]|$)
+ANTHROPIC_API_KEY([^=]|$)
+OPENAI_API_KEY([^=]|$)
