@@ -108,25 +108,45 @@ def test_main_help_exits_ok(capsys: pytest.CaptureFixture[str]) -> None:
     assert "--index" in out
 
 
-def test_main_missing_index_exits_io(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_missing_index_exits_io(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # Force the lite path (TERO_FORCE_LITE) so main() does NOT os.execv the discovered Rust binary
+    # in-process (which would hijack the test runner). Tokens present so we reach the index-load
+    # step rather than exiting EX_CONFIG first. A missing index must exit EX_IO, never-silent.
+    monkeypatch.setenv("TERO_FORCE_LITE", "1")
+    monkeypatch.setenv("TERO_TOKENS", "t:read")
     bad = tmp_path / "nope.json"
     with pytest.raises(SystemExit) as exc:
-        main(["--index", str(bad)])
+        main(["--lite", "--index", str(bad)])
     assert exc.value.code == EX_IO
     err = capsys.readouterr().err
     assert "index not found" in err
 
 
-def test_main_bad_arg_usage(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], index_path: Path) -> None:
-    # argv parsing failure path (argparse with add_help=False raises SystemExit on bad option)
-    # We trigger via the except in main by passing something argparse rejects before our logic.
-    # (current parser is permissive; simulate by calling with truly unknown that would have been caught)
-    # Instead just ensure we don't swallow usage errors for the index case we control.
+def test_main_no_tokens_exits_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, index_path: Path
+) -> None:
+    # Lite path with a valid index but NO tokens configured must refuse to start (EX_CONFIG) —
+    # matches the Rust binary's "no anonymous default" contract.
+    monkeypatch.setenv("TERO_FORCE_LITE", "1")
+    monkeypatch.delenv("TERO_TOKENS", raising=False)
+    monkeypatch.delenv("TERO_TOKENS_FILE", raising=False)
     with pytest.raises(SystemExit) as exc:
-        main(["--index", str(index_path), "--this-will-be-passed-but-ignored-by-rust-later"])
-    # It may reach Rust or lite; we only care it didn't die usage here for valid index.
-    # The usage exit is tested via the parser path already.
-    assert exc.value.code in (EX_OK, EX_CONFIG, 0) or True  # non-fatal for this negative
+        main(["--lite", "--index", str(index_path)])
+    assert exc.value.code == EX_CONFIG
+
+
+def test_main_bad_arg_usage(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    # An unknown flag is rejected by argparse (SystemExit), caught by main(), and re-raised as the
+    # deterministic EX_USAGE exit with a usage line — never a silent accept. Force-lite so the
+    # discovery/exec path is never reached before the parse error.
+    monkeypatch.setenv("TERO_FORCE_LITE", "1")
+    with pytest.raises(SystemExit) as exc:
+        main(["--this-flag-does-not-exist"])
+    assert exc.value.code == EX_USAGE
+    err = capsys.readouterr().err
+    assert "usage" in err.lower()
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -217,9 +237,23 @@ def test_wrapper_delegates_to_rust_and_identify_reports_rust(index_path: Path) -
     assert "discovered" in stderr and "from tero-rs binary" in stderr
     assert len(responses) == 1
     env = json.loads(responses[0]["result"]["content"][0]["text"])
-    assert env["name"] == "mycelium-tero"
+    # The extracted tero-rs engine identifies as "tero" (was "mycelium-tero" pre-extraction).
+    assert env["name"] == "tero"
     assert "M-1016 QueryEngine" in env["engine"]
     assert "layer2_enabled" in env
+    # FULL COVERAGE (maintainer requirement #1): the delegated Rust engine exposes every tero
+    # operation — the wrapper's whole point is to prefer this full-capability backend.
+    assert set(env["operations"]) == {
+        "identify",
+        "query_by_id",
+        "query_by_status",
+        "query_by_kind",
+        "cross_ref",
+        "text_search",
+        "cite",
+        "explain",
+        "refresh",
+    }
     # serverInfo would have been "tero-mcp" if we had done initialize too; this is sufficient
 
 

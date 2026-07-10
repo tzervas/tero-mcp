@@ -258,3 +258,15 @@ posture as a Mycelium-repo artifact).
 
 - [Assessment & gaps](docs/ASSESSMENT.md)
 - [Product roadmap & API plans](docs/ROADMAP.md)
+
+## Semver + Releases (2026-07-10 appended)
+
+Semver baseline established writ large (plan.md, Tero-scoped survey across workspace).
+
+- tero-mcp-lite: 0.1.0 (no prior tags).
+- Local uv build, annotated tag v0.1.0, gh release (dist attached).
+- Local podman GHCR for any future container dist (preference confirmed; peri example completed this way).
+- Process + cites in docs/ROADMAP.md semver section.
+- Hygiene + tero-index update done.
+
+Cites: plan.md, git/tero baselines (most 0.1.0 no tags), current-status.
