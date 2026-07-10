@@ -1,18 +1,21 @@
 # tero-mcp — Tero Index (Layer 1)
 
-> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-09.
+> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.
 > Use this index to find where to Read, not as authoritative ground truth.
 
-- **Items:** 49
+- **Items:** 65
 - **Flagged:** 0
 - **item_tag:** `Empirical/Declared`
 - **Machine index:** [`index.json`](./index.json)
 - **Manifest:** [`MANIFEST.toml`](./MANIFEST.toml)
 
-## doc (49 entries)
+## doc (54 entries)
 
 | Anchor | Kind | Id | Title | File:Line | Status | Summary |
 |---|---|---|---|---|---|---|
+| `agents` | section | — | AGENTS.md — tero-mcp (Python lite + packaging) | `AGENTS.md:1` | — | Tero-first: use tero MCP or scripts/tero.sh before changes. |
+| `agents--hygiene` | section | — | Hygiene | `AGENTS.md:5` | — | Use scripts/check.sh (or equiv uv/pytest/ruff). |
+| `agents--secrets-.env-and-git-secrets-protection-2026-07-10-tooling-1.0-wave` | section | — | Secrets, .env and git-secrets protection (2026-07-10, tooling 1.0 wave) | `AGENTS.md:8` | — | WHAT: |
 | `generating-an-index` | section | — | Generating a Tero index for any repo | `GENERATING-AN-INDEX.md:1` | — | tero-mcp-lite is a server, not a builder — it only ever reads a committed index.json. This |
 | `generating-an-index--where-the-schema-comes-from` | section | — | Where the schema comes from | `GENERATING-AN-INDEX.md:7` | — | The schema below is exactly what crates/mycelium-tero's Rust tero-index binary emits for Mycelium |
 | `generating-an-index--top-level-shape` | section | — | Top-level shape | `GENERATING-AN-INDEX.md:14` | — | { |
@@ -34,6 +37,7 @@
 | `readme--contact` | section | — | Contact | `README.md:244` | — | Maintainer contact for this package: |
 | `readme--license` | section | — | License | `README.md:251` | — | MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING |
 | `readme--status-roadmap` | section | — | Status & roadmap | `README.md:257` | — | - [Assessment & gaps](docs/ASSESSMENT.md) |
+| `readme--semver-releases-2026-07-10-appended` | section | — | Semver + Releases (2026-07-10 appended) | `README.md:262` | — | Semver baseline established writ large (plan.md, Tero-scoped survey across workspace). |
 | `assessment` | note | — | tero-mcp — Assessment & Gap Analysis | `docs/ASSESSMENT.md:1` | — | Date: 2026-07-08 |
 | `assessment--1.-what-this-project-is` | section | — | 1. What this project is | `docs/ASSESSMENT.md:10` | — | A lightweight MCP stdio front over a pre-built Tero-shaped index.json: |
 | `assessment--2.-current-maturity` | section | — | 2. Current maturity | `docs/ASSESSMENT.md:21` | — | Overall for L1 MCP: 4 / 5 — ready for production as L1 cited memory. |
@@ -57,9 +61,26 @@
 | `roadmap--wave-3-ecosystem` | section | — | Wave 3 — Ecosystem | `docs/ROADMAP.md:55` | — | — |
 | `roadmap--non-goals` | section | — | Non-goals | `docs/ROADMAP.md:66` | — | - Building the index inside this process |
 | `roadmap--pr-plan-suggested` | section | — | PR plan (suggested) | `docs/ROADMAP.md:74` | — | 1. docs: assessment + roadmap (this change) |
-| `roadmap--success-metrics` | section | — | Success metrics | `docs/ROADMAP.md:84` | — | — |
+| `roadmap--success-metrics` | section | — | Success metrics | `docs/ROADMAP.md:84` | — | Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions). |
+| `roadmap--semver-baseline-appended-2026-07-10` | section | — | Semver baseline (appended 2026-07-10) | `docs/ROADMAP.md:93` | — | Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions). |
 | `readme-2` | other | — | Tero index (Layer 1) | `docs/tero-index/README.md:1` | — | Machine + human citation index for this repository. |
 | `readme--regenerate` | section | — | Regenerate | `docs/tero-index/README.md:13` | — | python3 /path/to/tero-mcp/scripts/generateliteindex.py --root $(pwd) |
 | `readme--or-if-tero-mcp-is-a-sibling` | other | — | or if tero-mcp is a sibling: | `docs/tero-index/README.md:17` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root $(pwd) |
 | `readme--serve-locally` | section | — | Serve locally | `docs/tero-index/README.md:21` | — | export TEROTOKENS=local-dev:refresh |
+
+## changelog (11 entries)
+
+| Anchor | Kind | Id | Title | File:Line | Status | Summary |
+|---|---|---|---|---|---|---|
+| `changelog` | entry | — | Changelog | `CHANGELOG.md:1` | — | All notable changes to tero-mcp (Python lite + packaging for tero) documented here. |
+| `changelog--unreleased` | section | — | [Unreleased] | `CHANGELOG.md:7` | — | First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline). |
+| `changelog--0.1.1-2026-07-10-tooling-1.0-readiness-wave-productionization-first-package-release` | section | — | [0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release) | `CHANGELOG.md:9` | — | First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline). |
+| `changelog--fixed` | section | — | Fixed | `CHANGELOG.md:13` | — | - Version reconciliation (WHAT): the working tree carried an inconsistent version |
+| `changelog--changed` | section | — | Changed | `CHANGELOG.md:31` | — | - Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts |
+| `changelog--released` | section | — | Released | `CHANGELOG.md:39` | — | This 0.1.1 release comprises: |
+| `changelog--security` | section | — | Security | `CHANGELOG.md:48` | — | - .gitallowed hardening. The git-secrets allow-list was rewritten to remove entries that |
+| `changelog--notes` | section | — | Notes | `CHANGELOG.md:56` | — | - Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index |
+| `changelog--0.1.0-2026-07-10-tooling-1.0-readiness-wave-baseline` | section | — | [0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline) | `CHANGELOG.md:62` | — | Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md). |
+| `changelog--notes-on-1.0-path-not-yet-ready-for-1.0.0` | section | — | Notes on 1.0 path (not yet ready for 1.0.0) | `CHANGELOG.md:66` | — | - Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary. |
+| `changelog--this-tranche-work-appended` | section | — | This tranche work (appended) | `CHANGELOG.md:73` | — | - Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items). |
 

@@ -89,3 +89,15 @@ Optional OpenAPI stub for curl/Grok non-MCP hosts.
 | Offline pytest | 100% pass |
 | Cabal `--use-tero` | non-silent failure when misconfigured |
 | Refusal rate on empty queries | typed refusal, never `[]` success |
+
+## Semver baseline (appended 2026-07-10)
+
+Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions).
+
+- Baseline v0.1.0 for tero-mcp (pyproject + this).
+- See README.md##Semver for details, cites to Tero searches, git survey.
+- uv build + tag + gh release executed.
+- tero regen + hygiene completed pre-tag.
+- For rust sub-crates in ./rust/ : versions tracked via parent for now (tero-rs no standalone git here).
+
+Next bumps: hygiene gate, update-tero, append docs.

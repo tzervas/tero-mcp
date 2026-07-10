@@ -1,8 +1,38 @@
 {
-  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-09.",
+  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.",
   "item_tag": "Empirical/Declared",
   "siblings": [],
   "items": [
+    {
+      "anchor": "agents",
+      "family": "doc",
+      "kind": "section",
+      "title": "AGENTS.md — tero-mcp (Python lite + packaging)",
+      "file": "AGENTS.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "summary": "Tero-first: use tero MCP or scripts/tero.sh before changes."
+    },
+    {
+      "anchor": "agents--hygiene",
+      "family": "doc",
+      "kind": "section",
+      "title": "Hygiene",
+      "file": "AGENTS.md",
+      "line": 5,
+      "tag": "Empirical/Declared",
+      "summary": "Use scripts/check.sh (or equiv uv/pytest/ruff)."
+    },
+    {
+      "anchor": "agents--secrets-.env-and-git-secrets-protection-2026-07-10-tooling-1.0-wave",
+      "family": "doc",
+      "kind": "section",
+      "title": "Secrets, .env and git-secrets protection (2026-07-10, tooling 1.0 wave)",
+      "file": "AGENTS.md",
+      "line": 8,
+      "tag": "Empirical/Declared",
+      "summary": "WHAT:"
+    },
     {
       "anchor": "generating-an-index",
       "family": "doc",
@@ -212,6 +242,16 @@
       "line": 257,
       "tag": "Empirical/Declared",
       "summary": "- [Assessment & gaps](docs/ASSESSMENT.md)"
+    },
+    {
+      "anchor": "readme--semver-releases-2026-07-10-appended",
+      "family": "doc",
+      "kind": "section",
+      "title": "Semver + Releases (2026-07-10 appended)",
+      "file": "README.md",
+      "line": 262,
+      "tag": "Empirical/Declared",
+      "summary": "Semver baseline established writ large (plan.md, Tero-scoped survey across workspace)."
     },
     {
       "anchor": "assessment",
@@ -446,7 +486,18 @@
       "title": "Success metrics",
       "file": "docs/ROADMAP.md",
       "line": 84,
-      "tag": "Empirical/Declared"
+      "tag": "Empirical/Declared",
+      "summary": "Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions)."
+    },
+    {
+      "anchor": "roadmap--semver-baseline-appended-2026-07-10",
+      "family": "doc",
+      "kind": "section",
+      "title": "Semver baseline (appended 2026-07-10)",
+      "file": "docs/ROADMAP.md",
+      "line": 93,
+      "tag": "Empirical/Declared",
+      "summary": "Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions)."
     },
     {
       "anchor": "readme-2",
@@ -487,6 +538,116 @@
       "line": 21,
       "tag": "Empirical/Declared",
       "summary": "export TEROTOKENS=local-dev:refresh"
+    },
+    {
+      "anchor": "changelog",
+      "family": "changelog",
+      "kind": "entry",
+      "title": "Changelog",
+      "file": "CHANGELOG.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "summary": "All notable changes to tero-mcp (Python lite + packaging for tero) documented here."
+    },
+    {
+      "anchor": "changelog--unreleased",
+      "family": "changelog",
+      "kind": "section",
+      "title": "[Unreleased]",
+      "file": "CHANGELOG.md",
+      "line": 7,
+      "tag": "Empirical/Declared",
+      "summary": "First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline)."
+    },
+    {
+      "anchor": "changelog--0.1.1-2026-07-10-tooling-1.0-readiness-wave-productionization-first-package-release",
+      "family": "changelog",
+      "kind": "section",
+      "title": "[0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release)",
+      "file": "CHANGELOG.md",
+      "line": 9,
+      "tag": "Empirical/Declared",
+      "summary": "First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline)."
+    },
+    {
+      "anchor": "changelog--fixed",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Fixed",
+      "file": "CHANGELOG.md",
+      "line": 13,
+      "tag": "Empirical/Declared",
+      "summary": "- Version reconciliation (WHAT): the working tree carried an inconsistent version"
+    },
+    {
+      "anchor": "changelog--changed",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Changed",
+      "file": "CHANGELOG.md",
+      "line": 31,
+      "tag": "Empirical/Declared",
+      "summary": "- Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts"
+    },
+    {
+      "anchor": "changelog--released",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Released",
+      "file": "CHANGELOG.md",
+      "line": 39,
+      "tag": "Empirical/Declared",
+      "summary": "This 0.1.1 release comprises:"
+    },
+    {
+      "anchor": "changelog--security",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Security",
+      "file": "CHANGELOG.md",
+      "line": 48,
+      "tag": "Empirical/Declared",
+      "summary": "- .gitallowed hardening. The git-secrets allow-list was rewritten to remove entries that"
+    },
+    {
+      "anchor": "changelog--notes",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Notes",
+      "file": "CHANGELOG.md",
+      "line": 56,
+      "tag": "Empirical/Declared",
+      "summary": "- Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index"
+    },
+    {
+      "anchor": "changelog--0.1.0-2026-07-10-tooling-1.0-readiness-wave-baseline",
+      "family": "changelog",
+      "kind": "section",
+      "title": "[0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline)",
+      "file": "CHANGELOG.md",
+      "line": 62,
+      "tag": "Empirical/Declared",
+      "summary": "Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md)."
+    },
+    {
+      "anchor": "changelog--notes-on-1.0-path-not-yet-ready-for-1.0.0",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Notes on 1.0 path (not yet ready for 1.0.0)",
+      "file": "CHANGELOG.md",
+      "line": 66,
+      "tag": "Empirical/Declared",
+      "summary": "- Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary."
+    },
+    {
+      "anchor": "changelog--this-tranche-work-appended",
+      "family": "changelog",
+      "kind": "section",
+      "title": "This tranche work (appended)",
+      "file": "CHANGELOG.md",
+      "line": 73,
+      "tag": "Empirical/Declared",
+      "summary": "- Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items)."
     }
   ],
   "flagged": []
