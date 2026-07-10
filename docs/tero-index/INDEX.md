@@ -1,6 +1,6 @@
 # tero-mcp — Tero Index (Layer 1)
 
-> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-09.
+> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.
 > Use this index to find where to Read, not as authoritative ground truth.
 
 - **Items:** 49
