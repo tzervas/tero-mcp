@@ -537,7 +537,7 @@ fn find_by_anchor<'a>(report: &'a TeroIndexReport, anchor: &str) -> Option<&'a T
 ///
 /// A bare `corpus:DOC` resolves to the doc/research row whose `id == DOC`. A fragment
 /// `corpus:DOC#anchor` first tries the exact composed section anchor tero allocates
-/// (`{doc-anchor}--{anchor}`, `mycelium_doc::corpus::AnchorAlloc`'s namespacing), then falls back to
+/// (`{doc-anchor}--{anchor}`, `crate::md::AnchorAlloc`'s namespacing), then falls back to
 /// [`is_dedup_suffix_of`]'s **exact allocator suffix grammar** — never a bare
 /// `starts_with` — so a sibling section whose slug merely *extends* the fragment (e.g.
 /// `determinism-details` extending `determinism`) cannot be mistaken for a citation of it. If more
@@ -581,7 +581,7 @@ pub(crate) fn resolve_doc_ref<'a>(
     }
 }
 
-/// True when `anchor` matches `mycelium_doc::corpus::AnchorAlloc`'s collision-dedup grammar for
+/// True when `anchor` matches `crate::md::AnchorAlloc`'s collision-dedup grammar for
 /// `prefix`: either `anchor == prefix` exactly, or `anchor == "{prefix}-N"` where `N` is one or
 /// more ASCII digits (`AnchorAlloc::alloc`'s `-2`, `-3`, … dedup suffixing on a heading-slug
 /// collision — see `mycelium-doc/src/corpus.rs`). Deliberately

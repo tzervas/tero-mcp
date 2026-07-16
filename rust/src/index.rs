@@ -11,7 +11,7 @@
 
 use std::path::Path;
 
-use mycelium_doc::corpus::AnchorAlloc;
+use crate::md::AnchorAlloc;
 
 use crate::model::TeroIndexReport;
 use crate::{changelog, docs, issues, skills};
