@@ -40,6 +40,30 @@ OPERATIONS = [
     "refresh",
 ]
 
+# Memory MCP tools ship in the full `tero-rs` binary (optional memory-gate feature), not in lite.
+# See docs/MEMORY_TOOLS.md and join contract `join/mcp-delegation`.
+FUTURE_MEMORY_TOOLS: frozenset[str] = frozenset(
+    {"memory_store", "memory_retrieve", "memory_consolidate"}
+)
+
+LITE_MEMORY_REFUSAL_MESSAGE = (
+    "memory tools require tero-rs binary (not available in lite)"
+)
+
+
+def is_lite_memory_tool(name: str) -> bool:
+    """True when `name` is a memory tool the lite server must refuse (never implement in Python)."""
+    return name in FUTURE_MEMORY_TOOLS or name.startswith("memory_")
+
+
+def lite_memory_tool_refusal(tool_name: str) -> dict[str, Any]:
+    """Typed refusal envelope for memory tools invoked on the lite MCP path (`join/mcp-delegation`)."""
+    return {
+        "kind": "refusal",
+        "refusal": {"variant": "unavailable_in_lite", "tool": tool_name},
+        "message": LITE_MEMORY_REFUSAL_MESSAGE,
+    }
+
 
 @dataclass
 class FrontError(Exception):

@@ -1,15 +1,15 @@
 # tero-mcp — Tero Index (Layer 1)
 
-> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.
+> **Honesty:** Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-16.
 > Use this index to find where to Read, not as authoritative ground truth.
 
-- **Items:** 65
+- **Items:** 72
 - **Flagged:** 0
 - **item_tag:** `Empirical/Declared`
 - **Machine index:** [`index.json`](./index.json)
 - **Manifest:** [`MANIFEST.toml`](./MANIFEST.toml)
 
-## doc (54 entries)
+## doc (61 entries)
 
 | Anchor | Kind | Id | Title | File:Line | Status | Summary |
 |---|---|---|---|---|---|---|
@@ -25,19 +25,19 @@
 | `generating-an-index--producing-one-for-real` | section | — | Producing one for real | `GENERATING-AN-INDEX.md:123` | — | Two supported paths: |
 | `readme` | other | — | tero-mcp-lite | `README.md:1` | — | A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json — |
 | `readme--what-it-is-isnt` | section | — | What it is / isn't | `README.md:15` | — | - Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Five query |
-| `readme--install` | section | — | Install | `README.md:26` | — | Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/). |
-| `readme--register-in-.mcp.json-persistent-use-in-this-repo` | section | — | Register in `.mcp.json` (persistent use in this repo) | `README.md:54` | — | The repo-root .mcp.json already registers a tero server (see the top-level file). The entry: |
-| `readme--auth` | section | — | Auth | `README.md:80` | — | Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) — |
-| `readme--generating-an-index-for-any-repo` | section | — | Generating an index for any repo | `README.md:88` | — | See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to |
-| `readme--matching-the-rust-server` | section | — | Matching the Rust server | `README.md:94` | — | This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine |
-| `readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk` | section | — | Why a minimal implementation instead of the official `mcp` Python SDK | `README.md:134` | — | The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it |
-| `readme--adding-a-new-tool-the-registry-pattern` | section | — | Adding a new tool (the registry pattern) | `README.md:159` | — | src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's |
-| `readme--tests` | section | — | Tests | `README.md:195` | — | uv run pytest |
-| `readme--framework-remaining-tasks` | section | — | Framework — remaining tasks | `README.md:207` | — | A checklist for whoever picks this up next (in this repo or an extracted one): |
-| `readme--contact` | section | — | Contact | `README.md:244` | — | Maintainer contact for this package: |
-| `readme--license` | section | — | License | `README.md:251` | — | MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING |
-| `readme--status-roadmap` | section | — | Status & roadmap | `README.md:257` | — | - [Assessment & gaps](docs/ASSESSMENT.md) |
-| `readme--semver-releases-2026-07-10-appended` | section | — | Semver + Releases (2026-07-10 appended) | `README.md:262` | — | Semver baseline established writ large (plan.md, Tero-scoped survey across workspace). |
+| `readme--install` | section | — | Install | `README.md:28` | — | Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/). |
+| `readme--register-in-.mcp.json-persistent-use-in-this-repo` | section | — | Register in `.mcp.json` (persistent use in this repo) | `README.md:56` | — | The repo-root .mcp.json already registers a tero server (see the top-level file). The entry: |
+| `readme--auth` | section | — | Auth | `README.md:82` | — | Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) — |
+| `readme--generating-an-index-for-any-repo` | section | — | Generating an index for any repo | `README.md:90` | — | See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to |
+| `readme--matching-the-rust-server` | section | — | Matching the Rust server | `README.md:96` | — | This package was built by reading the tero-rs tero-mcp front (src/bin/tero-mcp.rs and |
+| `readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk` | section | — | Why a minimal implementation instead of the official `mcp` Python SDK | `README.md:136` | — | The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it |
+| `readme--adding-a-new-tool-the-registry-pattern` | section | — | Adding a new tool (the registry pattern) | `README.md:161` | — | src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's |
+| `readme--tests` | section | — | Tests | `README.md:197` | — | uv run pytest |
+| `readme--framework-remaining-tasks` | section | — | Framework — remaining tasks | `README.md:209` | — | A checklist for whoever picks this up next (in this repo or an extracted one): |
+| `readme--contact` | section | — | Contact | `README.md:246` | — | Maintainer contact for this package: |
+| `readme--license` | section | — | License | `README.md:253` | — | MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING |
+| `readme--status-roadmap` | section | — | Status & roadmap | `README.md:259` | — | - [Assessment & gaps](docs/ASSESSMENT.md) |
+| `readme--semver-releases-2026-07-10-appended` | section | — | Semver + Releases (2026-07-10 appended) | `README.md:264` | — | Semver baseline established writ large (plan.md, Tero-scoped survey across workspace). |
 | `assessment` | note | — | tero-mcp — Assessment & Gap Analysis | `docs/ASSESSMENT.md:1` | — | Date: 2026-07-08 |
 | `assessment--1.-what-this-project-is` | section | — | 1. What this project is | `docs/ASSESSMENT.md:10` | — | A lightweight MCP stdio front over a pre-built Tero-shaped index.json: |
 | `assessment--2.-current-maturity` | section | — | 2. Current maturity | `docs/ASSESSMENT.md:21` | — | Overall for L1 MCP: 4 / 5 — ready for production as L1 cited memory. |
@@ -51,6 +51,13 @@
 | `localchecks--from-a-checkout-that-can-see-the-generator-sibling-tero-mcp-recommended` | other | — | from a checkout that can see the generator (sibling tero-mcp recommended): | `docs/LOCAL_CHECKS.md:22` | — | python3 ../tero-mcp/scripts/generateliteindex.py --root "$(pwd)" |
 | `localchecks--or` | other | — | or: | `docs/LOCAL_CHECKS.md:24` | — | python3 scripts/generateteroindex.sh   # if present as a thin wrapper |
 | `localchecks--remote-optional` | section | — | Remote (optional) | `docs/LOCAL_CHECKS.md:30` | — | In GitHub: Actions → CI → Run workflow. |
+| `memorytools` | section | — | Memory tools (tero-rs only) | `docs/MEMORY_TOOLS.md:1` | Prep for Phase 3 — lite refuses; full binary delegates to memory-gate-rs via tero-rs. | Status: Prep for Phase 3 — lite refuses; full binary delegates to memory-gate-rs via tero-rs. |
+| `memorytools--architecture-invariant` | section | — | Architecture (invariant) | `docs/MEMORY_TOOLS.md:5` | — | tero-mcp (Python)  --exec/spawn-->  tero-rs tero-mcp binary |
+| `memorytools--tools-when-tero-rs-ships-them` | section | — | Tools (when tero-rs ships them) | `docs/MEMORY_TOOLS.md:17` | — | MG hits must not be returned as Layer-1 Citations without an L1 path (see join/tero-memory-feature). |
+| `memorytools--lite-server-behavior-today` | section | — | Lite server behavior today | `docs/MEMORY_TOOLS.md:27` | — | 1. Delegation first: tero-mcp-lite entrypoint resolves TERORSBINARY, workspace tero-mcp, or PATH and execs into the Rust server when found (nine L1 tools + fut… |
+| `memorytools--auth-scopes-planned` | section | — | Auth scopes (planned) | `docs/MEMORY_TOOLS.md:37` | — | Today lite tokens only support read and refresh (see teromcplite.auth.Scope). When Rust documents memory tools via --describe / tools/list, the token table wil… |
+| `memorytools--what-to-do-in-your-repo` | section | — | What to do in your repo | `docs/MEMORY_TOOLS.md:46` | — | - Need memory tools: Build/install tero-rs tero-mcp, set TERORSBINARY, enable tero-rs memory feature + MG config (TEROMEMORY — see join bulletin). |
+| `memorytools--out-of-scope-this-package` | section | — | Out of scope (this package) | `docs/MEMORY_TOOLS.md:51` | — | - Implementing memory handlers in Python |
 | `roadmap` | note | — | tero-mcp — Product Roadmap | `docs/ROADMAP.md:1` | Living (2026-07-08) | Status: Living (2026-07-08) |
 | `roadmap--waves` | section | — | Waves | `docs/ROADMAP.md:10` | — | — |
 | `roadmap--wave-0-hygiene-now` | section | — | Wave 0 — Hygiene (now) | `docs/ROADMAP.md:12` | — | — |

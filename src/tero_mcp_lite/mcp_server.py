@@ -35,6 +35,8 @@ from .core import (
     VIEW_FULL,
     FrontError,
     identify_value,
+    is_lite_memory_tool,
+    lite_memory_tool_refusal,
     parse_query,
     required_scope,
     run_and_envelope,
@@ -373,6 +375,8 @@ def _handle_tools_call(state: McpState, msg: dict[str, Any]) -> dict[str, Any]:
         raise FrontError.from_auth_error(e) from e
 
     if spec is None:
+        if is_lite_memory_tool(name):
+            return lite_memory_tool_refusal(name)
         raise FrontError.bad_request(f"unknown tool {name!r} (see tools/list)")
     return spec.handler(state, args)
 
