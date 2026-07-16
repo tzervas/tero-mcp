@@ -1,5 +1,5 @@
 {
-  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-10.",
+  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-16.",
   "item_tag": "Empirical/Declared",
   "siblings": [],
   "items": [
@@ -129,7 +129,7 @@
       "kind": "section",
       "title": "Install",
       "file": "README.md",
-      "line": 26,
+      "line": 28,
       "tag": "Empirical/Declared",
       "summary": "Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/)."
     },
@@ -139,7 +139,7 @@
       "kind": "section",
       "title": "Register in `.mcp.json` (persistent use in this repo)",
       "file": "README.md",
-      "line": 54,
+      "line": 56,
       "tag": "Empirical/Declared",
       "summary": "The repo-root .mcp.json already registers a tero server (see the top-level file). The entry:"
     },
@@ -149,7 +149,7 @@
       "kind": "section",
       "title": "Auth",
       "file": "README.md",
-      "line": 80,
+      "line": 82,
       "tag": "Empirical/Declared",
       "summary": "Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) —"
     },
@@ -159,7 +159,7 @@
       "kind": "section",
       "title": "Generating an index for any repo",
       "file": "README.md",
-      "line": 88,
+      "line": 90,
       "tag": "Empirical/Declared",
       "summary": "See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to"
     },
@@ -169,9 +169,9 @@
       "kind": "section",
       "title": "Matching the Rust server",
       "file": "README.md",
-      "line": 94,
+      "line": 96,
       "tag": "Empirical/Declared",
-      "summary": "This package was built by reading crates/mycelium-tero/src/bin/tero-mcp.rs and the engine"
+      "summary": "This package was built by reading the tero-rs tero-mcp front (src/bin/tero-mcp.rs and"
     },
     {
       "anchor": "readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk",
@@ -179,7 +179,7 @@
       "kind": "section",
       "title": "Why a minimal implementation instead of the official `mcp` Python SDK",
       "file": "README.md",
-      "line": 134,
+      "line": 136,
       "tag": "Empirical/Declared",
       "summary": "The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it"
     },
@@ -189,7 +189,7 @@
       "kind": "section",
       "title": "Adding a new tool (the registry pattern)",
       "file": "README.md",
-      "line": 159,
+      "line": 161,
       "tag": "Empirical/Declared",
       "summary": "src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's"
     },
@@ -199,7 +199,7 @@
       "kind": "section",
       "title": "Tests",
       "file": "README.md",
-      "line": 195,
+      "line": 197,
       "tag": "Empirical/Declared",
       "summary": "uv run pytest"
     },
@@ -209,7 +209,7 @@
       "kind": "section",
       "title": "Framework — remaining tasks",
       "file": "README.md",
-      "line": 207,
+      "line": 209,
       "tag": "Empirical/Declared",
       "summary": "A checklist for whoever picks this up next (in this repo or an extracted one):"
     },
@@ -219,7 +219,7 @@
       "kind": "section",
       "title": "Contact",
       "file": "README.md",
-      "line": 244,
+      "line": 246,
       "tag": "Empirical/Declared",
       "summary": "Maintainer contact for this package:"
     },
@@ -229,7 +229,7 @@
       "kind": "section",
       "title": "License",
       "file": "README.md",
-      "line": 251,
+      "line": 253,
       "tag": "Empirical/Declared",
       "summary": "MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING"
     },
@@ -239,7 +239,7 @@
       "kind": "section",
       "title": "Status & roadmap",
       "file": "README.md",
-      "line": 257,
+      "line": 259,
       "tag": "Empirical/Declared",
       "summary": "- [Assessment & gaps](docs/ASSESSMENT.md)"
     },
@@ -249,7 +249,7 @@
       "kind": "section",
       "title": "Semver + Releases (2026-07-10 appended)",
       "file": "README.md",
-      "line": 262,
+      "line": 264,
       "tag": "Empirical/Declared",
       "summary": "Semver baseline established writ large (plan.md, Tero-scoped survey across workspace)."
     },
@@ -381,6 +381,77 @@
       "line": 30,
       "tag": "Empirical/Declared",
       "summary": "In GitHub: Actions → CI → Run workflow."
+    },
+    {
+      "anchor": "memorytools",
+      "family": "doc",
+      "kind": "section",
+      "title": "Memory tools (tero-rs only)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 1,
+      "tag": "Empirical/Declared",
+      "status": "Prep for Phase 3 — lite refuses; full binary delegates to memory-gate-rs via tero-rs.",
+      "summary": "Status: Prep for Phase 3 — lite refuses; full binary delegates to memory-gate-rs via tero-rs."
+    },
+    {
+      "anchor": "memorytools--architecture-invariant",
+      "family": "doc",
+      "kind": "section",
+      "title": "Architecture (invariant)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 5,
+      "tag": "Empirical/Declared",
+      "summary": "tero-mcp (Python)  --exec/spawn-->  tero-rs tero-mcp binary"
+    },
+    {
+      "anchor": "memorytools--tools-when-tero-rs-ships-them",
+      "family": "doc",
+      "kind": "section",
+      "title": "Tools (when tero-rs ships them)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 17,
+      "tag": "Empirical/Declared",
+      "summary": "MG hits must not be returned as Layer-1 Citations without an L1 path (see join/tero-memory-feature)."
+    },
+    {
+      "anchor": "memorytools--lite-server-behavior-today",
+      "family": "doc",
+      "kind": "section",
+      "title": "Lite server behavior today",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 27,
+      "tag": "Empirical/Declared",
+      "summary": "1. Delegation first: tero-mcp-lite entrypoint resolves TERORSBINARY, workspace tero-mcp, or PATH and execs into the Rust server when found (nine L1 tools + fut…"
+    },
+    {
+      "anchor": "memorytools--auth-scopes-planned",
+      "family": "doc",
+      "kind": "section",
+      "title": "Auth scopes (planned)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 37,
+      "tag": "Empirical/Declared",
+      "summary": "Today lite tokens only support read and refresh (see teromcplite.auth.Scope). When Rust documents memory tools via --describe / tools/list, the token table wil…"
+    },
+    {
+      "anchor": "memorytools--what-to-do-in-your-repo",
+      "family": "doc",
+      "kind": "section",
+      "title": "What to do in your repo",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 46,
+      "tag": "Empirical/Declared",
+      "summary": "- Need memory tools: Build/install tero-rs tero-mcp, set TERORSBINARY, enable tero-rs memory feature + MG config (TEROMEMORY — see join bulletin)."
+    },
+    {
+      "anchor": "memorytools--out-of-scope-this-package",
+      "family": "doc",
+      "kind": "section",
+      "title": "Out of scope (this package)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 51,
+      "tag": "Empirical/Declared",
+      "summary": "- Implementing memory handlers in Python"
     },
     {
       "anchor": "roadmap",

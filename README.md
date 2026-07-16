@@ -1,8 +1,8 @@
 # tero-mcp-lite
 
 A lightweight, portable **MCP (Model Context Protocol) server** over a Tero corpus `index.json` —
-the Python-only counterpart to Mycelium's Rust `tero-mcp` binary
-(`crates/mycelium-tero/src/bin/tero-mcp.rs`, DN-87 / E39-1). It answers cited, provenance-carrying
+the Python-only counterpart to the Rust `tero-mcp` binary in **tero-rs**
+(`src/bin/tero-mcp.rs` in the `tero-rs` crate, DN-87 / E39-1). It answers cited, provenance-carrying
 queries about a project's corpus (docs, decisions, issues, changelog, skills) over stdio JSON-RPC 2.0,
 with the same never-silent-refusal contract: **an answer without a resolvable citation is a typed
 refusal, never a silent empty result** (DN-87 §6.2).
@@ -21,7 +21,9 @@ repo that has (or generates) a Tero-shaped index, not just Mycelium's own.
 - **Isn't:** an index *builder*. Regenerating `index.json` for your repo is a separate concern — see
   [`GENERATING-AN-INDEX.md`](./GENERATING-AN-INDEX.md).
 - **Isn't:** Layer-2 (VSA semantic search). `identify` always reports `layer2_enabled: false`. If you
-  need that, use the full Rust `mycelium-tero` crate this package is a lite sibling of.
+  need that, use the full Rust **tero-rs** `tero-mcp` binary this package delegates to when present.
+  **Memory tools** (`memory_store` / `memory_retrieve` / `memory_consolidate`) are tero-rs-only — see
+  [`docs/MEMORY_TOOLS.md`](./docs/MEMORY_TOOLS.md); lite refuses them honestly.
 
 ## Install
 
@@ -93,8 +95,8 @@ repo that emits the same shape.
 
 ## Matching the Rust server
 
-This package was built by reading `crates/mycelium-tero/src/bin/tero-mcp.rs` and the engine
-(`src/model.rs`, `src/query.rs`, `src/front/{core,mcp,auth}.rs`) and mirroring:
+This package was built by reading the tero-rs `tero-mcp` front (`src/bin/tero-mcp.rs` and
+`src/front/{core,mcp,auth}.rs`, plus `src/model.rs` / `src/query.rs`) and mirroring:
 
 - the **same nine tools**, same `inputSchema` shapes, same required arguments;
 - the **same JSON-RPC transport**: newline-delimited JSON-RPC 2.0 over stdio, `initialize` →
