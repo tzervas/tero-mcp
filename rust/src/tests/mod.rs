@@ -13,6 +13,7 @@ mod flagged;
 mod front_auth;
 mod front_core;
 mod front_http;
+mod front_live_corpus;
 mod front_mcp;
 mod front_parity;
 mod front_smoke;
@@ -29,5 +30,5 @@ mod vsa2_explain;
 #[test]
 fn summary_names_the_crate_and_its_dn() {
     let s = crate_summary();
-    assert!(s.contains("mycelium-tero") && s.contains("DN-87"));
+    assert!(s.contains("tero") && s.contains("DN-87"));
 }

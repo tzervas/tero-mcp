@@ -12,8 +12,8 @@
 //! Honesty (G2): status/guarantee are the leading lattice keyword of the metadata cell, verbatim
 //! from source; a doc family that should carry a status but does not is **flagged**, never assumed.
 
-use mycelium_doc::corpus::{ingest, AnchorAlloc};
-use mycelium_doc::{Level, Node, Payload, SourceKind};
+use crate::md::{ingest, AnchorAlloc};
+use crate::md::{Level, Node, Payload, SourceKind};
 
 use crate::model::{Family, Flagged, TeroIndexItem};
 use crate::walk::{collect_ext, is_excluded, repo_rel};

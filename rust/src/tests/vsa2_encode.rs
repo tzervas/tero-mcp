@@ -1,7 +1,7 @@
 //! White-box tests for Layer-2 **encoding** (M-1018): determinism (pure function of corpus+seed),
 //! the never-silent empirical-profile guard, the fixed record dimension, and the recorded top-K cap.
 
-use mycelium_vsa::MapI;
+use crate::vsa2::algebra::MapI;
 
 use crate::vsa2::atoms::{atom, TERO_L2_SEED};
 use crate::vsa2::encode::{build_codebook, encode_record, tokenize};

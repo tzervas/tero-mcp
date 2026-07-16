@@ -12,7 +12,7 @@
 //! rather than return a low-quality nearest neighbour (FR-S4/G2). The thresholds are `Declared` knobs
 //! (below), **not** tuned to manufacture a gate pass — the eval measures raw recall without them.
 
-use mycelium_vsa::{CleanupMemory, MapI, VsaModel};
+use crate::vsa2::algebra::{CleanupMemory, MapI};
 
 /// Minimum cosine confidence for the served [`super::Layer2Index::query`] path to return an answer.
 /// A `Declared` knob (a nearest-neighbour below this is refused, not returned). Deliberately modest —

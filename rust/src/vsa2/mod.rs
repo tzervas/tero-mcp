@@ -18,6 +18,7 @@
 //!   recovering a filler from a *bundle* is **`Empirical`** (crosstalk) — see [`Layer2Index::probe_kind`];
 //! - the encode regime profile → **`Declared`** until trials (see [`profile`]).
 
+pub mod algebra;
 pub mod atoms;
 pub mod decode;
 pub mod encode;
@@ -26,7 +27,7 @@ pub mod profile;
 
 use std::collections::BTreeMap;
 
-use mycelium_vsa::{CleanupMemory, MapI, Match, VsaModel};
+use crate::vsa2::algebra::{CleanupMemory, MapI, Match};
 
 use crate::model::TeroIndexReport;
 use crate::query::Citation;

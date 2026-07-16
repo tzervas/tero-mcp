@@ -5,7 +5,7 @@
 //! extracted verbatim from the header where present; a header with neither is still indexed (its
 //! full text is the title), never dropped.
 
-use mycelium_doc::corpus::AnchorAlloc;
+use crate::md::AnchorAlloc;
 
 use crate::model::{Family, Flagged, TeroIndexItem};
 
