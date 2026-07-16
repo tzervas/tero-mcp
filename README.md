@@ -22,8 +22,10 @@ repo that has (or generates) a Tero-shaped index, not just Mycelium's own.
   [`GENERATING-AN-INDEX.md`](./GENERATING-AN-INDEX.md).
 - **Isn't:** Layer-2 (VSA semantic search). `identify` always reports `layer2_enabled: false`. If you
   need that, use the full Rust **tero-rs** `tero-mcp` binary this package delegates to when present.
-  **Memory tools** (`memory_store` / `memory_retrieve` / `memory_consolidate`) are tero-rs-only — see
-  [`docs/MEMORY_TOOLS.md`](./docs/MEMORY_TOOLS.md); lite refuses them honestly.
+  **Memory tools** (`memory_store` / `memory_retrieve` / `memory_consolidate`) are tero-rs-only — build
+  with Cargo feature `memory`, scopes `memory-read` / `memory-write`, runtime `TERO_MEMORY_ENABLED`,
+  `TERO_MEMORY_DB`, optional `TERO_MEMORY_MODEL` — see [`docs/MEMORY_TOOLS.md`](./docs/MEMORY_TOOLS.md);
+  lite parses the same scopes but refuses memory `tools/call` honestly.
 
 ## Install
 
