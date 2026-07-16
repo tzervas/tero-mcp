@@ -13,6 +13,11 @@ from pathlib import Path
 import pytest
 
 from tero_mcp_lite.auth import TokenTable
+from tero_mcp_lite.core import (
+    LITE_MEMORY_REFUSAL_MESSAGE,
+    is_lite_memory_tool,
+    lite_memory_tool_refusal,
+)
 from tero_mcp_lite.mcp_server import McpState, serve
 from tero_mcp_lite.model import load_report
 
@@ -178,6 +183,42 @@ def test_unknown_method_is_method_not_found(state: McpState) -> None:
     ]
     responses = _run(state, messages)
     assert responses[0]["error"]["code"] == -32601
+
+
+def test_lite_memory_tool_refusal_helper_shape() -> None:
+    assert is_lite_memory_tool("memory_store")
+    assert is_lite_memory_tool("memory_custom_future")
+    assert not is_lite_memory_tool("query_by_id")
+    env = lite_memory_tool_refusal("memory_retrieve")
+    assert env["kind"] == "refusal"
+    assert env["refusal"] == {
+        "variant": "unavailable_in_lite",
+        "tool": "memory_retrieve",
+    }
+    assert env["message"] == LITE_MEMORY_REFUSAL_MESSAGE
+
+
+def test_memory_store_call_is_typed_refusal_in_lite(state: McpState) -> None:
+    state.tokens = TokenTable.parse("mem:memory-write")
+    messages = [
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": "memory_store",
+                "arguments": {"token": "mem", "content": "x"},
+            },
+        },
+    ]
+    responses = _run(state, messages)
+    call = responses[0]["result"]
+    assert call["isError"] is False
+    envelope = json.loads(call["content"][0]["text"])
+    assert envelope["kind"] == "refusal"
+    assert envelope["refusal"]["variant"] == "unavailable_in_lite"
+    assert envelope["refusal"]["tool"] == "memory_store"
+    assert envelope["message"] == LITE_MEMORY_REFUSAL_MESSAGE
 
 
 def test_notification_without_id_is_silently_ignored(state: McpState) -> None:

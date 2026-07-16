@@ -56,6 +56,43 @@ def test_invalid_token_raises() -> None:
     assert excinfo.value.kind == "invalid"
 
 
+def test_parse_accepts_memory_scopes() -> None:
+    t = TokenTable.parse("mread:memory-read mwrite:memory-write")
+    assert len(t) == 2
+    assert t.authorize("mread", Scope.MEMORY_READ) == Scope.MEMORY_READ
+    assert t.authorize("mwrite", Scope.MEMORY_WRITE) == Scope.MEMORY_WRITE
+
+
+def test_scope_lattice_refresh_is_superset_of_read() -> None:
+    assert Scope.REFRESH.allows(Scope.READ)
+    assert Scope.REFRESH.allows(Scope.REFRESH)
+    assert Scope.READ.allows(Scope.READ)
+    assert not Scope.READ.allows(Scope.REFRESH)
+
+
+def test_memory_scope_lattice_is_orthogonal_to_l1() -> None:
+    assert Scope.MEMORY_WRITE.allows(Scope.MEMORY_READ)
+    assert not Scope.MEMORY_READ.allows(Scope.MEMORY_WRITE)
+    assert not Scope.READ.allows(Scope.MEMORY_READ)
+    assert not Scope.REFRESH.allows(Scope.MEMORY_WRITE)
+    assert not Scope.MEMORY_READ.allows(Scope.REFRESH)
+    assert not Scope.MEMORY_WRITE.allows(Scope.REFRESH)
+
+
+def test_memory_write_token_satisfies_memory_read() -> None:
+    t = TokenTable.parse("mw:memory-write")
+    assert t.authorize("mw", Scope.MEMORY_READ) == Scope.MEMORY_WRITE
+
+
+def test_read_token_cannot_memory_write() -> None:
+    t = TokenTable.parse("tok:read")
+    with pytest.raises(AuthError) as excinfo:
+        t.authorize("tok", Scope.MEMORY_WRITE)
+    assert excinfo.value.kind == "insufficient_scope"
+    assert excinfo.value.have == Scope.READ
+    assert excinfo.value.need == Scope.MEMORY_WRITE
+
+
 def test_from_env_unset_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("TERO_TOKENS", raising=False)
     monkeypatch.delenv("TERO_TOKENS_FILE", raising=False)
