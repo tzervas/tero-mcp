@@ -4,7 +4,7 @@
 [index]
 schema = "tero-layer1-v1"
 repo = "tero-mcp"
-generated_at = "2026-07-16T03:36:09Z"
+generated_at = "2026-07-16T03:51:47Z"
 item_count = 72
 source_files = 9
 generator = "tero-mcp/scripts/generate_lite_index.py"

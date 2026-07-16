@@ -110,8 +110,14 @@ class FrontError(Exception):
 
 
 def required_scope(op: str) -> Scope:
-    """The required [`Scope`] for an operation name — everything is read-only except `refresh`."""
-    return Scope.REFRESH if op == "refresh" else Scope.READ
+    """The required [`Scope`] for an operation name (mirrors tero-rs `front/core.rs`)."""
+    if op == "refresh":
+        return Scope.REFRESH
+    if op == "memory_retrieve":
+        return Scope.MEMORY_READ
+    if op in ("memory_store", "memory_consolidate"):
+        return Scope.MEMORY_WRITE
+    return Scope.READ
 
 
 def parse_query(

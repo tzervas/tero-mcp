@@ -199,6 +199,7 @@ def test_lite_memory_tool_refusal_helper_shape() -> None:
 
 
 def test_memory_store_call_is_typed_refusal_in_lite(state: McpState) -> None:
+    state.tokens = TokenTable.parse("mem:memory-write")
     messages = [
         {
             "jsonrpc": "2.0",
@@ -206,7 +207,7 @@ def test_memory_store_call_is_typed_refusal_in_lite(state: McpState) -> None:
             "method": "tools/call",
             "params": {
                 "name": "memory_store",
-                "arguments": {"token": "devtoken", "content": "x"},
+                "arguments": {"token": "mem", "content": "x"},
             },
         },
     ]

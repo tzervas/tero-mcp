@@ -3,7 +3,10 @@
 - **Tokens are runtime-only** — supplied via `TERO_TOKENS` (an inline `token:scope` list) or
   `TERO_TOKENS_FILE` (the same grammar in a file). **Never** committed, logged, or serialized.
 - **Read-only by default** — the `read` scope covers query/cite/explain/identify; the broader
-  `refresh` scope additionally permits reloading the index. `refresh` implies `read`.
+  `refresh` scope additionally permits reloading the index. `refresh ⊇ read` for Layer-1 only.
+- **Memory scopes** (`memory-read`, `memory-write`) are orthogonal to L1: `memory-write ⊇
+  memory-read` for memory tools; neither memory scope permits `refresh`, and `read`/`refresh` do
+  not permit memory tools (mirrors tero-rs `front/auth.rs`).
 - **Refuse to start without tokens** — [`TokenTable.from_env`] raises (not an empty, accidentally-
   open table) when no tokens are configured; the server surfaces it on stderr and exits non-zero.
   There is no anonymous default (matches the Rust server's `TokenTable::from_env` contract exactly).
@@ -21,25 +24,32 @@ from pathlib import Path
 
 
 class Scope(Enum):
-    """The access scope a token carries. `REFRESH` is a strict superset of `READ`."""
+    """The access scope a token carries. `REFRESH` is a strict superset of `READ` for L1 only."""
 
     READ = "read"
     REFRESH = "refresh"
-
-    def rank(self) -> int:
-        return {Scope.READ: 0, Scope.REFRESH: 1}[self]
+    MEMORY_READ = "memory-read"
+    MEMORY_WRITE = "memory-write"
 
     def allows(self, required: "Scope") -> bool:
         """Whether a token of `self` scope may perform an operation requiring `required` scope."""
-        return self.rank() >= required.rank()
+        if required is Scope.READ:
+            return self in (Scope.READ, Scope.REFRESH)
+        if required is Scope.REFRESH:
+            return self is Scope.REFRESH
+        if required is Scope.MEMORY_READ:
+            return self in (Scope.MEMORY_READ, Scope.MEMORY_WRITE)
+        if required is Scope.MEMORY_WRITE:
+            return self is Scope.MEMORY_WRITE
+        return False
 
     @classmethod
     def parse(cls, s: str) -> "Scope | None":
         """Parse a scope keyword. `None` for anything else (never a silent default)."""
-        try:
-            return cls(s)
-        except ValueError:
-            return None
+        for member in cls:
+            if member.value == s:
+                return member
+        return None
 
 
 class TokenTableError(Exception):
@@ -108,7 +118,8 @@ class TokenTable:
             scope = Scope.parse(scope_s)
             if scope is None:
                 raise TokenTableError(
-                    f"unknown scope {scope_s!r} in entry {entry!r} (expected `read` or `refresh`)"
+                    f"unknown scope {scope_s!r} in entry {entry!r} (expected `read`, `refresh`, "
+                    f"`memory-read`, or `memory-write`)"
                 )
             tokens[tok] = scope
         if not tokens:

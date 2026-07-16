@@ -34,18 +34,28 @@ Message (stable):
 
 > memory tools require tero-rs binary (not available in lite)
 
-## Auth scopes (planned)
+## Auth scopes
 
-Today lite tokens only support `read` and `refresh` (see `tero_mcp_lite.auth.Scope`). When Rust documents memory tools via `--describe` / `tools/list`, the token table will gain:
+Token grammar matches tero-rs 0.2 (`tero_mcp_lite.auth.Scope`): `read`, `refresh`, `memory-read`, `memory-write`.
 
-- `memory-read` — `memory_retrieve`
-- `memory-write` — `memory_store`, `memory_consolidate`
+- `memory-read` — required for `memory_retrieve` (`memory-write ⊇ memory-read`)
+- `memory-write` — required for `memory_store`, `memory_consolidate`
 
-Until then, lite uses the same per-call `token` argument and refuses memory tool names after auth (default `read` scope for unrecognized tool names, matching Rust probe order).
+Memory scopes are **orthogonal** to Layer-1: a `read` or `refresh` token does not authorize memory tools; a `memory-read` token does not authorize `refresh`.
+
+Lite still refuses every `memory_*` `tools/call` after auth with `unavailable_in_lite` (no Python implementation).
 
 ## What to do in your repo
 
-- **Need memory tools:** Build/install `tero-rs` `tero-mcp`, set `TERO_RS_BINARY`, enable tero-rs memory feature + MG config (`TERO_MEMORY_*` — see join bulletin).
+- **Need memory tools:** Build/install tero-rs with Cargo feature `memory` (`cargo build --features memory -p tero-rs --bin tero-mcp`), set `TERO_RS_BINARY`, then configure runtime (tero-rs 0.2):
+
+  | Variable | Role |
+  |----------|------|
+  | `TERO_MEMORY_ENABLED` | `1` or `true` to open the store at startup (default off) |
+  | `TERO_MEMORY_DB` | SQLite path for dense store (required when enabled) |
+  | `TERO_MEMORY_MODEL` | Embedding catalog id (default `bge-small-en-v1.5`) |
+
+  Tokens need `memory-read` / `memory-write` in `TERO_TOKENS` as above.
 - **Layer-1 only:** Use lite or Rust without memory feature; no MG required.
 
 ## Out of scope (this package)
