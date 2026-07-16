@@ -16,7 +16,7 @@
 //! (recorded as [`RecordStats::proven`]) — that is the honest checked-instantiation fact about the
 //! bundle's internal decodability, distinct from the cross-codebook cleanup recall the gate measures.
 
-use mycelium_vsa::{capacity, CleanupMemory, MapI, VsaModel};
+use crate::vsa2::algebra::{capacity, CleanupMemory, MapI};
 
 use crate::model::{Family, TeroIndexItem, TeroIndexReport};
 

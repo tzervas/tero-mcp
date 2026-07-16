@@ -14,4 +14,9 @@ else
 fi
 # self-check index generator on this repo
 python3 scripts/generate_lite_index.py --root .
+if command -v cargo >/dev/null 2>&1; then
+  if [[ "$MODE" != "--quick" ]]; then
+    (cd rust && cargo test --quiet)
+  fi
+fi
 echo "OK: tero-mcp checks passed"

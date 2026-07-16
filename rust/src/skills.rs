@@ -8,7 +8,7 @@
 //! `file:line` — a recorded scoping choice, not a silent drop (G2). A SKILL.md with no frontmatter
 //! or no `name` is **flagged**.
 
-use mycelium_doc::corpus::AnchorAlloc;
+use crate::md::AnchorAlloc;
 
 use crate::docs::one_line;
 use crate::model::{Family, Flagged, TeroIndexItem};

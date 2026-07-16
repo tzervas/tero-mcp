@@ -1,4 +1,4 @@
-//! mycelium-tero — the transparent memory substrate & agent knowledge API (DN-87 / E39-1).
+//! tero — the transparent memory substrate & agent knowledge API (DN-87 / E39-1).
 //!
 //! **M-1015 (this crate's first landed engine): Layer 1 — the deterministic, drift-gated structured
 //! index over the WHOLE corpus.** It generalizes the proven `docs/api-index/` + `docs/lib-index/`
@@ -54,11 +54,16 @@ mod front;
 mod index;
 mod issues;
 mod load;
+/// Self-contained markdown corpus ingest (replaces mycelium-doc path dep).
+mod md;
 mod model;
 mod query;
 mod skills;
 mod vsa2;
 mod walk;
+
+#[cfg(feature = "memory")]
+pub mod memory;
 
 pub use emit::{write_json, write_markdown};
 pub use index::build_tero_index;
@@ -73,6 +78,7 @@ pub use query::{Answer, Citation, Explain, Query, QueryEngine, RankedHit, Refusa
 // fronts (`front::core`); the auth allow-list + the HTTP server type a binary needs to construct.
 pub use front::auth::{AuthError, Scope, TokenTable, TokenTableError};
 pub use front::http::{serve_http, AppState};
+pub use front::mcp::SERVER_NAME;
 pub use front::mcp::{serve_mcp_stdio, tool_descriptors};
 
 // M-1018 — Layer 2 (the VSA semantic layer) + the Empirical eval gate. The public surface is
@@ -89,7 +95,7 @@ pub use vsa2::{Layer2Answer, Layer2Explain, Layer2Index, Layer2Refusal, TERO_L2_
 /// The program's one-line summary, used by the (future) API fronts' identify endpoint.
 #[must_use]
 pub fn crate_summary() -> &'static str {
-    "mycelium-tero: the transparent memory substrate & agent knowledge api (DN-87; Layer-1 index + \
+    "tero: the transparent memory substrate & agent knowledge api (DN-87; Layer-1 index + \
      query engine)"
 }
 

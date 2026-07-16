@@ -113,12 +113,13 @@ fn cite_and_explain_views_project_the_answer() {
 #[test]
 fn identify_reports_the_engine_and_the_gated_layer2() {
     let v = identify_value(false);
-    assert_eq!(v["name"], "mycelium-tero");
+    assert_eq!(v["name"], "tero");
     assert_eq!(v["layer2_enabled"], false);
-    assert!(v["summary"]
-        .as_str()
-        .is_some_and(|s| s.contains("mycelium-tero")));
-    assert!(v["operations"].as_array().is_some_and(|a| a.len() == 9));
+    assert!(v["summary"].as_str().is_some_and(|s| s.contains("tero")));
+    let op_len = if cfg!(feature = "memory") { 12 } else { 9 };
+    assert!(v["operations"]
+        .as_array()
+        .is_some_and(|a| a.len() == op_len));
     assert!(v["siblings"].as_array().is_some_and(|a| !a.is_empty()));
 }
 
@@ -127,6 +128,12 @@ fn required_scope_is_read_by_default_and_refresh_for_refresh() {
     assert_eq!(required_scope("refresh"), Scope::Refresh);
     for op in ["identify", "query_by_id", "cite", "explain", "text_search"] {
         assert_eq!(required_scope(op), Scope::Read, "op {op} must be read-only");
+    }
+    #[cfg(feature = "memory")]
+    {
+        assert_eq!(required_scope("memory_retrieve"), Scope::MemoryRead);
+        assert_eq!(required_scope("memory_store"), Scope::MemoryWrite);
+        assert_eq!(required_scope("memory_consolidate"), Scope::MemoryWrite);
     }
 }
 

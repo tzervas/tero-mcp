@@ -1,15 +1,49 @@
+# Standalone Rust engine (synced from tero-rs; no mycelium path deps).
 [package]
 name = "tero-mcp"
 version = "0.1.0"
+description = "tero-mcp — transparent memory substrate MCP/HTTP fronts (DN-87); Python lite sibling crate"
 edition = "2021"
+rust-version = "1.85.0"
+license = "MIT"
+repository = "https://github.com/tzervas/tero-mcp"
+publish = false
+
+[features]
+default = []
+memory = ["dep:memory-gate-rs"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "io-util"] }
+axum = "0.8"
+memory-gate-rs = { git = "https://github.com/tzervas/memory-gate-rs", optional = true, default-features = false, features = ["sqlite-vec"] }
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+
+[[bin]]
+name = "tero-index"
+path = "src/bin/tero-index.rs"
+
+[[bin]]
+name = "tero-http"
+path = "src/bin/tero-http.rs"
 
 [[bin]]
 name = "tero-mcp"
 path = "src/bin/tero-mcp.rs"
 
-[dependencies]
-# Note: for full port, dependencies from mycelium-tero would be here.
-# For now, this is placeholder; full port would extract the model etc.
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-# Add other as needed from port
+[[bin]]
+name = "tero-eval"
+path = "src/bin/tero-eval.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+overflow-checks = true
