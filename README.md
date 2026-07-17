@@ -1,5 +1,10 @@
 # tero-mcp-lite
 
+<!-- FLEET-BADGES:BEGIN -->
+[![CI](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-ci.yml/badge.svg?branch=main)](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-ci.yml?query=branch%3Amain)
+[![Security](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-security.yml/badge.svg?branch=main)](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-security.yml?query=branch%3Amain)
+<!-- FLEET-BADGES:END -->
+
 A lightweight, portable **MCP (Model Context Protocol) server** over a Tero corpus `index.json` —
 the Python-only counterpart to the Rust `tero-mcp` binary in **tero-rs**
 (`src/bin/tero-mcp.rs` in the `tero-rs` crate, DN-87 / E39-1). It answers cited, provenance-carrying
