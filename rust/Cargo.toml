@@ -1,7 +1,7 @@
 # Standalone Rust engine (synced from tero-rs; no mycelium path deps).
 [package]
 name = "tero-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "tero-mcp — transparent memory substrate MCP/HTTP fronts (DN-87); Python lite sibling crate"
 edition = "2021"
 rust-version = "1.85.0"
