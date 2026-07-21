@@ -6,6 +6,43 @@ Format: Keep a Changelog + SemVer.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-21 (memory-scope parity + standalone Rust engine)
+
+### Added
+- **Memory auth scopes (tero-rs 0.2 parity).** `Scope.MEMORY_READ` / `Scope.MEMORY_WRITE` in
+  `tero_mcp_lite.auth`, orthogonal to the existing `read`/`refresh` lattice (`memory-write ⊇
+  memory-read`; neither memory scope grants `refresh`, and `read`/`refresh` do not grant memory
+  tools). Lite still honestly refuses every `memory_*` `tools/call` (`unavailable_in_lite`) — it
+  parses the scopes for token-grammar parity but implements no memory backend itself.
+- **`docs/MEMORY_TOOLS.md`.** New reference doc covering the `tero-mcp-lite` → tero-rs delegation
+  architecture, the `memory_store`/`memory_retrieve`/`memory_consolidate` tool surface (tero-rs +
+  `--features memory` only), required `TERO_MEMORY_*` runtime env, and the `TERO_TOKENS` grammar
+  gotcha (one scope per token entry — commas separate entries, not scopes).
+- **`scripts/smoke-memory-path.sh`.** Local smoke test covering lite's honest memory refusal, the
+  12-tool surface exposed by a `--features memory` Rust build, and the `memory_store`/
+  `memory_retrieve` MCP envelopes (`memory_stored`/`memory_hits`).
+- **README:** new "Delegating to tero-rs (optional)" section documenting the `tero-mcp-lite` binary
+  resolution order (`TERO_FORCE_LITE` / `TERO_RS_BINARY` / sibling `tero-rs` build / `PATH`) that
+  was previously only implicit in code comments.
+
+### Changed
+- **Rust engine resynced standalone from tero-rs, dropping the `mycelium_doc`/`mycelium_vsa` path
+  deps** — `rust/` now vendors its own markdown ingest + VSA2 algebra and builds independently of
+  the `mycelium` workspace, with an optional `memory` Cargo feature (`memory-gate-rs`, off by
+  default). `cargo test` now runs as part of `scripts/check.sh` (non-`--quick` mode).
+- **CI:** fleet self-hosted-podman runners now handle push/PR triggers for the standalone Rust
+  build (previously manual-dispatch only).
+- Wrapper e2e tests tolerate an optional `memory_*` tool surface on `identify` when tero-rs is
+  built with `--features memory`, and skip Rust-delegation tests cleanly when no `tero-mcp` binary
+  is discoverable (e.g. fleet runners without a sibling `tero-rs` checkout).
+
+### Notes
+- No breaking changes to the Layer-1 tool surface, JSON-RPC transport, or refusal semantics; this
+  release is additive (memory-scope auth plumbing + docs) and a packaging/CI hygiene pass.
+- Still deferred (see README "Framework — remaining tasks" and `docs/MEMORY_TOOLS.md`): a live
+  Rust↔Python differential parity test, an HTTP front, and Layer-2/VSA semantic search in
+  `tero-mcp-lite` itself (`identify` continues to report `layer2_enabled: false`).
+
 ## [0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release)
 
 First productionized release of the `tero-mcp` front. Bumped from 0.1.0 (semver baseline).

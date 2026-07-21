@@ -89,6 +89,24 @@ a whitespace/comma-separated `token:scope` list, e.g. `s3cr3t:read other:refresh
 Every `tools/call` carries its own `token` argument (checked against the operation's required scope
 before dispatch) — auth is per-call, not per-connection, matching the Rust server's model exactly.
 
+## Delegating to tero-rs (optional)
+
+If a full-capability `tero-mcp` binary (built from the `tero-rs` crate) is discoverable, the
+`tero-mcp-lite` entry point `exec`s into it instead of serving the pure-Python engine — same
+`--index`, same inherited env (`TERO_TOKENS` included). Resolution order:
+
+1. `TERO_FORCE_LITE=1` (or `--lite`) — skip delegation entirely, always serve the Python engine.
+2. `TERO_RS_BINARY=/path/to/tero-mcp` — explicit override, used as-is if executable.
+3. A `tero-rs/target/{release,debug}/tero-mcp` binary found by walking up from the install location
+   or a sibling workspace root.
+4. `tero-mcp` on `PATH`.
+5. Otherwise, fall back to the lite Python engine (nine Layer-1 tools only).
+
+Delegating to tero-rs is what unlocks the memory tools (`memory_store` / `memory_retrieve` /
+`memory_consolidate`) — see [`docs/MEMORY_TOOLS.md`](./docs/MEMORY_TOOLS.md) for the Cargo `memory`
+feature, the `memory-read`/`memory-write` scopes, and the `TERO_TOKENS` grammar gotcha (one scope per
+token entry; commas separate entries, not scopes).
+
 ## Generating an index for any repo
 
 See [`GENERATING-AN-INDEX.md`](./GENERATING-AN-INDEX.md) for the `index.json` schema and how to
