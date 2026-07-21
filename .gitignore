@@ -31,3 +31,4 @@ __pycache__/
 *.key
 secrets/
 
+.fastembed_cache/
