@@ -47,7 +47,7 @@ Lite still refuses every `memory_*` `tools/call` after auth with `unavailable_in
 
 ## What to do in your repo
 
-- **Need memory tools:** Build/install tero-rs with Cargo feature `memory` (`cargo build --features memory -p tero-rs --bin tero-mcp`), set `TERO_RS_BINARY`, then configure runtime (tero-rs 0.2):
+- **Need memory tools:** Build/install tero-rs with Cargo feature `memory` (`cargo build --release --features memory --bin tero-mcp`), set `TERO_RS_BINARY`, then configure runtime (tero-rs 0.2):
 
   | Variable | Role |
   |----------|------|
@@ -56,7 +56,31 @@ Lite still refuses every `memory_*` `tools/call` after auth with `unavailable_in
   | `TERO_MEMORY_MODEL` | Embedding catalog id (default `bge-small-en-v1.5`) |
 
   Tokens need `memory-read` / `memory-write` in `TERO_TOKENS` as above.
+
+  **Token grammar (gotcha):** `TERO_TOKENS` is whitespace-separated `token:scope` entries.
+  One scope per token name (a HashMap). Comma-joined scopes are **invalid**.
+  Example for L1 + memory in one process:
+
+  ```bash
+  export TERO_TOKENS='local-dev:refresh mem:memory-write'
+  # L1 tools use token local-dev; memory_* use token mem (memory-write ⊇ memory-read)
+  ```
+
 - **Layer-1 only:** Use lite or Rust without memory feature; no MG required.
+
+## Smoke (local)
+
+```bash
+# from tero-mcp checkout; sibling tero-rs release binary recommended
+export TERO_RS_BINARY=../tero-rs/target/release/tero-mcp
+export TERO_INDEX_PATH=../cabal-devmelopner/docs/tero-index/index.json
+export TERO_TOKENS='local-dev:refresh mem:memory-write'
+./scripts/smoke-memory-path.sh
+```
+
+Covers: lite refusal · 12-tool surface when feature on · MCP `memory_store` /
+`memory_retrieve` envelopes (`memory_stored` / `memory_hits`).
+Evidence log: workspace `plans/evidence/memory-path-smoke-2026-07-21.md`.
 
 ## Out of scope (this package)
 
