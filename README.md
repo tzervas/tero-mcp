@@ -287,15 +287,76 @@ posture as a Mycelium-repo artifact).
 - [Cargo.lock policy](docs/CARGO-LOCKFILE.md)
 - [Product roadmap & API plans](docs/ROADMAP.md)
 
-## Semver + Releases
+## Semver + releases
 
-**Current release:** `v0.2.0` (2026-07-21).
+**Current version: `0.2.0`** — released as tag `v0.2.0`. Tags to date: `v0.1.0`, `v0.1.1`,
+`v0.2.0`. (The note that previously stood here said *"tero-mcp-lite: 0.1.0 (no prior tags)"*; it
+was written on 2026-07-10 and had been overtaken by two releases.)
 
-| Source | Version |
-|--------|---------|
-| `pyproject.toml` / `tero_mcp_lite.__version__` | **0.2.0** |
-| `rust/Cargo.toml` (`CARGO_PKG_VERSION` / MCP `serverInfo`) | **0.2.0** |
-| GitHub Release / tag | **v0.2.0** |
+### The policy
 
-Prior: v0.1.0 baseline, v0.1.1 first package release. PyPI not published (install from git/uv path).
-Process + cites: `docs/ROADMAP.md` semver section.
+`tero-mcp-lite` is versioned **0.x.y** and stays there. Commitizen enforces this with
+`major_version_zero = true` in [`.cz.toml`](.cz.toml). Moving to **1.x.x requires an explicit
+human authorization** — full production readiness, hardening, and a maintainer decision. **No
+agent, and no automation, may cut or propose a 1.x.x release.**
+
+### Under `major_version_zero`, MINOR is the breaking position
+
+While the major is pinned at 0:
+
+| Change                        | Bump      | Example           |
+| ----------------------------- | --------- | ----------------- |
+| `fix:`                        | PATCH     | 0.2.0 → 0.2.1     |
+| `feat:`                       | PATCH     | 0.2.0 → 0.2.1     |
+| `feat!:` / `BREAKING CHANGE:` | **MINOR** | 0.2.0 → **0.3.0** |
+
+A consumer pinning "latest compatible" pins the **minor** — `~= 0.2.0`, or the moving tag `v0.2`.
+Never `"1"`, and never a bare `v1` tag: under this scheme `0.2` and `0.3` are *incompatible*
+releases, exactly as `1.x` and `2.x` would be after a 1.0 cut.
+
+With `major_version_zero` **absent**, commitizen treats a breaking change as MAJOR and mints
+`1.0.0` on the first `feat!:` — a version nobody authorized.
+
+### Version files
+
+Do not hand-edit a version. [`.cz.toml`](.cz.toml) lists every file that carries one, and
+`cz bump` moves them together:
+
+- `pyproject.toml` — `[project] version`
+- `src/tero_mcp_lite/__init__.py` — `__version__`
+- `.cz.toml` itself — `version`
+
+```bash
+cz bump --yes --dry-run     # show what would happen, change nothing
+cz bump                     # move every version file + create the tag
+cz version --project        # what this project currently claims to be
+```
+
+This list is not theoretical. **These files drifted once already**: `v0.2.0` was tagged and
+released while both still said `0.1.1`, so `uv tool install ...@v0.2.0` produced a package that
+self-reported `0.1.1` — and `identify` returns `__version__` to callers, so the MCP server told
+every agent the wrong version of itself.
+
+`rust/Cargo.toml` is deliberately **excluded**: that is a separate package (`tero-mcp`), not this
+one (`tero-mcp-lite`). That the two currently share the number `0.2.0` is a coincidence, not a
+contract.
+
+### A GitHub Release is not a registry publication
+
+- **A git tag / GitHub Release** is a marker plus notes. It publishes nothing consumable.
+- **A PyPI publication** is the artifact dependents actually install.
+
+`tero-mcp-lite` has **never been published to PyPI**. `v0.1.0`, `v0.1.1` and `v0.2.0` are GitHub
+Releases with a `uv`-built dist attached — installable by URL or tag, not by name from an index.
+When you claim a version is released, say *where*.
+
+### Release steps
+
+1. Land work on `dev` via a work branch — never straight to `main`.
+2. `cz bump` on the release branch: this moves every version file and creates the tag locally.
+3. Open the release PR `dev` → `main`. Merge with a **merge commit**, never a squash.
+4. Push the tag; attach the `uv build` dist to the GitHub Release.
+5. **Publishing to PyPI would be a separate, deliberate step.** It has not happened.
+
+Local podman GHCR is the preference for any future container distribution. Process notes and
+citations: `docs/ROADMAP.md` semver section, `plan.md`.
