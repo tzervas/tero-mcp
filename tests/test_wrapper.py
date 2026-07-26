@@ -475,10 +475,16 @@ def test_rust_vs_lite_parity_on_fixture_queries(index_path: Path) -> None:
 def test_real_workspace_index_queries_are_fast_and_correct() -> None:
     """Smoke the actual index used by the live tero MCP registration."""
     _require_rust_binary()
-    ws_index = Path("/root/git/workspace/dev-docs/docs/tero-index/index.json")
+    repo_root = Path(__file__).resolve().parents[1]
+    ws_index = Path(
+        os.environ.get(
+            "TERO_WS_INDEX",
+            str(repo_root.parent / "dev-docs" / "docs" / "tero-index" / "index.json"),
+        )
+    )
     try:
         if not ws_index.is_file():
-            pytest.skip(f"workspace hub index not present: {ws_index}")
+            pytest.skip(f"optional workspace hub index not present: {ws_index}")
     except PermissionError:
         pytest.skip(f"workspace hub index not readable: {ws_index}")
 
