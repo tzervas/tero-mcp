@@ -1,5 +1,5 @@
 {
-  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-16.",
+  "generated": "Empirical/Declared — lite heading/line heuristic over markdown in tero-mcp via tero-mcp/scripts/generate_lite_index.py; source files are ground truth. Generated 2026-07-26.",
   "item_tag": "Empirical/Declared",
   "siblings": [],
   "items": [
@@ -114,14 +114,24 @@
       "summary": "A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json —"
     },
     {
+      "anchor": "readme--should-an-agent-use-this-at-all",
+      "family": "doc",
+      "kind": "section",
+      "title": "Should an agent use this at all?",
+      "file": "README.md",
+      "line": 15,
+      "tag": "Empirical/Declared",
+      "summary": "Only if the index actually covers what you're looking for. tero-mcp-lite is a thin front over a"
+    },
+    {
       "anchor": "readme--what-it-is-isnt",
       "family": "doc",
       "kind": "section",
       "title": "What it is / isn't",
       "file": "README.md",
-      "line": 15,
+      "line": 36,
       "tag": "Empirical/Declared",
-      "summary": "- Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Five query"
+      "summary": "- Is: a thin, honest query engine + MCP stdio front over a pre-built index.json. Six tools"
     },
     {
       "anchor": "readme--install",
@@ -129,7 +139,7 @@
       "kind": "section",
       "title": "Install",
       "file": "README.md",
-      "line": 30,
+      "line": 53,
       "tag": "Empirical/Declared",
       "summary": "Requires Python >= 3.11 and [uv](https://docs.astral.sh/uv/)."
     },
@@ -139,7 +149,7 @@
       "kind": "section",
       "title": "Register in `.mcp.json` (persistent use in this repo)",
       "file": "README.md",
-      "line": 58,
+      "line": 81,
       "tag": "Empirical/Declared",
       "summary": "The repo-root .mcp.json already registers a tero server (see the top-level file). The entry:"
     },
@@ -149,9 +159,19 @@
       "kind": "section",
       "title": "Auth",
       "file": "README.md",
-      "line": 84,
+      "line": 107,
       "tag": "Empirical/Declared",
       "summary": "Exactly like the Rust server: set TEROTOKENS (or TEROTOKENSFILE, a path to the same grammar) —"
+    },
+    {
+      "anchor": "readme--delegating-to-tero-rs-optional",
+      "family": "doc",
+      "kind": "section",
+      "title": "Delegating to tero-rs (optional)",
+      "file": "README.md",
+      "line": 115,
+      "tag": "Empirical/Declared",
+      "summary": "If a full-capability tero-mcp binary (built from the tero-rs crate) is discoverable, the"
     },
     {
       "anchor": "readme--generating-an-index-for-any-repo",
@@ -159,19 +179,69 @@
       "kind": "section",
       "title": "Generating an index for any repo",
       "file": "README.md",
-      "line": 92,
+      "line": 133,
       "tag": "Empirical/Declared",
       "summary": "See [GENERATING-AN-INDEX.md](./GENERATING-AN-INDEX.md) for the index.json schema and how to"
     },
     {
-      "anchor": "readme--matching-the-rust-server",
+      "anchor": "readme--tool-surface-0.3.0-redesign",
       "family": "doc",
       "kind": "section",
-      "title": "Matching the Rust server",
+      "title": "Tool surface (0.3.0 redesign)",
       "file": "README.md",
-      "line": 98,
+      "line": 139,
       "tag": "Empirical/Declared",
-      "summary": "This package was built by reading the tero-rs tero-mcp front (src/bin/tero-mcp.rs and"
+      "summary": "Through 0.2.x this server exposed nine tools that mirrored the Rust tero-mcp front"
+    },
+    {
+      "anchor": "readme--search-the-primary-tool-tiered-by-how-often-each-argument-is-actually-used",
+      "family": "doc",
+      "kind": "section",
+      "title": "`search` — the primary tool, tiered by how often each argument is actually used",
+      "file": "README.md",
+      "line": 152,
+      "tag": "Empirical/Declared",
+      "summary": "search(text?, id?, kind?, family?, limit?, advanced?)"
+    },
+    {
+      "anchor": "readme--cite-explain-a-known-reference-or-rarely-a-fresh-query",
+      "family": "doc",
+      "kind": "section",
+      "title": "`cite` / `explain` — a known reference, or (rarely) a fresh query",
+      "file": "README.md",
+      "line": 204,
+      "tag": "Empirical/Declared",
+      "summary": "cite(ref?, query?)      explain(ref?, query?)"
+    },
+    {
+      "anchor": "readme--crossref-identify-refresh-unchanged",
+      "family": "doc",
+      "kind": "section",
+      "title": "`cross_ref` / `identify` / `refresh` — unchanged",
+      "file": "README.md",
+      "line": 221,
+      "tag": "Empirical/Declared",
+      "summary": "These already took \"a reference and little else\" pre-0.3.0 and weren't touched. crossref(start,"
+    },
+    {
+      "anchor": "readme--untrusted-content",
+      "family": "doc",
+      "kind": "section",
+      "title": "Untrusted content",
+      "file": "README.md",
+      "line": 227,
+      "tag": "Empirical/Declared",
+      "summary": "items[].title/items[].summary (and any full row under advanced.format=\"full\") are corpus"
+    },
+    {
+      "anchor": "readme--matching-the-rust-server-whats-still-shared-whats-not",
+      "family": "doc",
+      "kind": "section",
+      "title": "Matching the Rust server — what's still shared, what's not",
+      "file": "README.md",
+      "line": 237,
+      "tag": "Empirical/Declared",
+      "summary": "This package still shares the transport and error/refusal layer with the Rust tero-mcp front"
     },
     {
       "anchor": "readme--why-a-minimal-implementation-instead-of-the-official-mcp-python-sdk",
@@ -179,7 +249,7 @@
       "kind": "section",
       "title": "Why a minimal implementation instead of the official `mcp` Python SDK",
       "file": "README.md",
-      "line": 138,
+      "line": 268,
       "tag": "Empirical/Declared",
       "summary": "The official mcp SDK (PyPI mcp) does install cleanly via uv with no version conflicts — it"
     },
@@ -189,7 +259,7 @@
       "kind": "section",
       "title": "Adding a new tool (the registry pattern)",
       "file": "README.md",
-      "line": 163,
+      "line": 293,
       "tag": "Empirical/Declared",
       "summary": "src/teromcplite/mcpserver.py derives both tools/list's descriptors and tools/call's"
     },
@@ -199,7 +269,7 @@
       "kind": "section",
       "title": "Tests",
       "file": "README.md",
-      "line": 199,
+      "line": 335,
       "tag": "Empirical/Declared",
       "summary": "uv run pytest"
     },
@@ -209,9 +279,39 @@
       "kind": "section",
       "title": "Framework — remaining tasks",
       "file": "README.md",
-      "line": 211,
+      "line": 352,
       "tag": "Empirical/Declared",
       "summary": "A checklist for whoever picks this up next (in this repo or an extracted one):"
+    },
+    {
+      "anchor": "readme--security-posture",
+      "family": "doc",
+      "kind": "section",
+      "title": "Security posture",
+      "file": "README.md",
+      "line": 403,
+      "tag": "Empirical/Declared",
+      "summary": "Assessed as part of the 0.3.0 redesign (this server's threat model: single-user, LAN-local stdio"
+    },
+    {
+      "anchor": "readme--index-coverage-what-should-be-indexed-proposed-not-built",
+      "family": "doc",
+      "kind": "section",
+      "title": "Index coverage — what should be indexed (proposed, not built)",
+      "file": "README.md",
+      "line": 431,
+      "tag": "Empirical/Declared",
+      "summary": "The index this server is most useful over today — the workspace dev-docs hub at"
+    },
+    {
+      "anchor": "readme--token-efficiency-verdict",
+      "family": "doc",
+      "kind": "section",
+      "title": "Token-efficiency verdict",
+      "file": "README.md",
+      "line": 474,
+      "tag": "Empirical/Declared",
+      "summary": "Is tero-mcp-lite currently worth an agent's tokens? Depends entirely on which index it's pointed"
     },
     {
       "anchor": "readme--contact",
@@ -219,7 +319,7 @@
       "kind": "section",
       "title": "Contact",
       "file": "README.md",
-      "line": 248,
+      "line": 500,
       "tag": "Empirical/Declared",
       "summary": "Maintainer contact for this package:"
     },
@@ -229,7 +329,7 @@
       "kind": "section",
       "title": "License",
       "file": "README.md",
-      "line": 255,
+      "line": 507,
       "tag": "Empirical/Declared",
       "summary": "MIT — see the repository root LICENSE (or add one in an extracted repo; ADR-022 §7 / CONTRIBUTING"
     },
@@ -239,7 +339,7 @@
       "kind": "section",
       "title": "Status & roadmap",
       "file": "README.md",
-      "line": 261,
+      "line": 513,
       "tag": "Empirical/Declared",
       "summary": "- [Assessment & gaps](docs/ASSESSMENT.md)"
     },
@@ -249,7 +349,7 @@
       "kind": "section",
       "title": "Semver + Releases (2026-07-10 appended)",
       "file": "README.md",
-      "line": 266,
+      "line": 518,
       "tag": "Empirical/Declared",
       "summary": "Semver baseline established writ large (plan.md, Tero-scoped survey across workspace)."
     },
@@ -321,6 +421,16 @@
       "line": 73,
       "tag": "Empirical/Declared",
       "summary": "- [ROADMAP.md](ROADMAP.md) — waves + API plan"
+    },
+    {
+      "anchor": "assessment--7.-tool-surface-redesign-2026-07-25-appended",
+      "family": "doc",
+      "kind": "section",
+      "title": "7. Tool-surface redesign (2026-07-25, appended)",
+      "file": "docs/ASSESSMENT.md",
+      "line": 79,
+      "tag": "Empirical/Declared",
+      "summary": "Superseding the \"5\" row and \"nine tools\" language above (§2): as of 0.3.0 the tool surface is"
     },
     {
       "anchor": "localchecks",
@@ -441,7 +551,27 @@
       "file": "docs/MEMORY_TOOLS.md",
       "line": 48,
       "tag": "Empirical/Declared",
-      "summary": "- Need memory tools: Build/install tero-rs with Cargo feature memory (cargo build --features memory -p tero-rs --bin tero-mcp), set TERORSBINARY, then configur…"
+      "summary": "- Need memory tools: Build/install tero-rs with Cargo feature memory (cargo build --release --features memory --bin tero-mcp), set TERORSBINARY, then configure…"
+    },
+    {
+      "anchor": "memorytools--smoke-local",
+      "family": "doc",
+      "kind": "section",
+      "title": "Smoke (local)",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 71,
+      "tag": "Empirical/Declared",
+      "summary": "export TERORSBINARY=../tero-rs/target/release/tero-mcp"
+    },
+    {
+      "anchor": "memorytools--from-tero-mcp-checkout-sibling-tero-rs-release-binary-recommended",
+      "family": "doc",
+      "kind": "other",
+      "title": "from tero-mcp checkout; sibling tero-rs release binary recommended",
+      "file": "docs/MEMORY_TOOLS.md",
+      "line": 74,
+      "tag": "Empirical/Declared",
+      "summary": "export TERORSBINARY=../tero-rs/target/release/tero-mcp"
     },
     {
       "anchor": "memorytools--out-of-scope-this-package",
@@ -449,7 +579,7 @@
       "kind": "section",
       "title": "Out of scope (this package)",
       "file": "docs/MEMORY_TOOLS.md",
-      "line": 61,
+      "line": 85,
       "tag": "Empirical/Declared",
       "summary": "- Implementing memory handlers in Python"
     },
@@ -571,6 +701,16 @@
       "summary": "Per plan.md + user: semver + releases for packages writ large. Local builds/podman GHCR (no Actions)."
     },
     {
+      "anchor": "roadmap--tool-surface-redesign-token-efficiency-2026-07-25-appended",
+      "family": "doc",
+      "kind": "section",
+      "title": "Tool-surface redesign — token efficiency (2026-07-25, appended)",
+      "file": "docs/ROADMAP.md",
+      "line": 105,
+      "tag": "Empirical/Declared",
+      "summary": "0.3.0: merged querybyid/querybystatus/querybykind/textsearch into one composable"
+    },
+    {
       "anchor": "readme-2",
       "family": "doc",
       "kind": "other",
@@ -628,7 +768,87 @@
       "file": "CHANGELOG.md",
       "line": 7,
       "tag": "Empirical/Declared",
-      "summary": "First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline)."
+      "summary": "- querybyid/querybystatus/querybykind/textsearch merged into one composable"
+    },
+    {
+      "anchor": "changelog--0.3.0-2026-07-25-token-efficiency-tool-surface-redesign",
+      "family": "changelog",
+      "kind": "section",
+      "title": "[0.3.0] - 2026-07-25 (token-efficiency tool-surface redesign)",
+      "file": "CHANGELOG.md",
+      "line": 9,
+      "tag": "Empirical/Declared",
+      "summary": "- querybyid/querybystatus/querybykind/textsearch merged into one composable"
+    },
+    {
+      "anchor": "changelog--changed-breaking-tool-surface-deliberately-no-longer-rust-parity",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Changed — BREAKING (tool surface, deliberately no longer Rust-parity)",
+      "file": "CHANGELOG.md",
+      "line": 11,
+      "tag": "Empirical/Declared",
+      "summary": "- querybyid/querybystatus/querybykind/textsearch merged into one composable"
+    },
+    {
+      "anchor": "changelog--added",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Added",
+      "file": "CHANGELOG.md",
+      "line": 31,
+      "tag": "Empirical/Declared",
+      "summary": "- Token-efficient defaults. search defaults to format=\"compact\" (trimmed per-row fields —"
+    },
+    {
+      "anchor": "changelog--removed",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Removed",
+      "file": "CHANGELOG.md",
+      "line": 61,
+      "tag": "Empirical/Declared",
+      "summary": "- querybyid, querybystatus, querybykind, textsearch as top-level tools (superseded by"
+    },
+    {
+      "anchor": "changelog--0.2.0-2026-07-21-memory-scope-parity-standalone-rust-engine",
+      "family": "changelog",
+      "kind": "section",
+      "title": "[0.2.0] - 2026-07-21 (memory-scope parity + standalone Rust engine)",
+      "file": "CHANGELOG.md",
+      "line": 66,
+      "tag": "Empirical/Declared",
+      "summary": "- Memory auth scopes (tero-rs 0.2 parity). Scope.MEMORYREAD / Scope.MEMORYWRITE in"
+    },
+    {
+      "anchor": "changelog--added-2",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Added",
+      "file": "CHANGELOG.md",
+      "line": 68,
+      "tag": "Empirical/Declared",
+      "summary": "- Memory auth scopes (tero-rs 0.2 parity). Scope.MEMORYREAD / Scope.MEMORYWRITE in"
+    },
+    {
+      "anchor": "changelog--changed",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Changed",
+      "file": "CHANGELOG.md",
+      "line": 85,
+      "tag": "Empirical/Declared",
+      "summary": "- Rust engine resynced standalone from tero-rs, dropping the myceliumdoc/myceliumvsa path"
+    },
+    {
+      "anchor": "changelog--notes",
+      "family": "changelog",
+      "kind": "section",
+      "title": "Notes",
+      "file": "CHANGELOG.md",
+      "line": 96,
+      "tag": "Empirical/Declared",
+      "summary": "- No breaking changes to the Layer-1 tool surface, JSON-RPC transport, or refusal semantics; this"
     },
     {
       "anchor": "changelog--0.1.1-2026-07-10-tooling-1.0-readiness-wave-productionization-first-package-release",
@@ -636,7 +856,7 @@
       "kind": "section",
       "title": "[0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release)",
       "file": "CHANGELOG.md",
-      "line": 9,
+      "line": 103,
       "tag": "Empirical/Declared",
       "summary": "First productionized release of the tero-mcp front. Bumped from 0.1.0 (semver baseline)."
     },
@@ -646,17 +866,17 @@
       "kind": "section",
       "title": "Fixed",
       "file": "CHANGELOG.md",
-      "line": 13,
+      "line": 107,
       "tag": "Empirical/Declared",
       "summary": "- Version reconciliation (WHAT): the working tree carried an inconsistent version"
     },
     {
-      "anchor": "changelog--changed",
+      "anchor": "changelog--changed-2",
       "family": "changelog",
       "kind": "section",
       "title": "Changed",
       "file": "CHANGELOG.md",
-      "line": 31,
+      "line": 125,
       "tag": "Empirical/Declared",
       "summary": "- Full-coverage assertion (maintainer requirement #1). The Rust-delegation e2e test now asserts"
     },
@@ -666,7 +886,7 @@
       "kind": "section",
       "title": "Released",
       "file": "CHANGELOG.md",
-      "line": 39,
+      "line": 133,
       "tag": "Empirical/Declared",
       "summary": "This 0.1.1 release comprises:"
     },
@@ -676,17 +896,17 @@
       "kind": "section",
       "title": "Security",
       "file": "CHANGELOG.md",
-      "line": 48,
+      "line": 142,
       "tag": "Empirical/Declared",
       "summary": "- .gitallowed hardening. The git-secrets allow-list was rewritten to remove entries that"
     },
     {
-      "anchor": "changelog--notes",
+      "anchor": "changelog--notes-2",
       "family": "changelog",
       "kind": "section",
       "title": "Notes",
       "file": "CHANGELOG.md",
-      "line": 56,
+      "line": 150,
       "tag": "Empirical/Declared",
       "summary": "- Test suite: 59 tests green (uv run pytest), fully offline — synthetic in-memory index"
     },
@@ -696,7 +916,7 @@
       "kind": "section",
       "title": "[0.1.0] - 2026-07-10 (tooling-1.0-readiness wave baseline)",
       "file": "CHANGELOG.md",
-      "line": 62,
+      "line": 156,
       "tag": "Empirical/Declared",
       "summary": "Initial 0.1.0 from prior semver-baseline chore (see commit history + plan.md)."
     },
@@ -706,7 +926,7 @@
       "kind": "section",
       "title": "Notes on 1.0 path (not yet ready for 1.0.0)",
       "file": "CHANGELOG.md",
-      "line": 66,
+      "line": 160,
       "tag": "Empirical/Declared",
       "summary": "- Current: 0.1.0 supporting lite server. Stable for PoC use with tero-rs binary."
     },
@@ -716,9 +936,78 @@
       "kind": "section",
       "title": "This tranche work (appended)",
       "file": "CHANGELOG.md",
-      "line": 73,
+      "line": 167,
       "tag": "Empirical/Declared",
       "summary": "- Hygiene first: equiv pytest + generator run (46+ tests green; index updated to 51 items)."
+    },
+    {
+      "anchor": "skill",
+      "family": "skill",
+      "kind": "skill",
+      "title": "tero-search",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 6,
+      "tag": "Empirical/Declared",
+      "summary": "Agent-facing usage guide for tero-mcp-lite 0.3.0's six tools. See the package README (\"Tool"
+    },
+    {
+      "anchor": "skill--should-you-even-call-this",
+      "family": "skill",
+      "kind": "section",
+      "title": "Should you even call this?",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 13,
+      "tag": "Empirical/Declared",
+      "summary": "Only if the corpus you need is indexed. identify reports siblings (other indices this one"
+    },
+    {
+      "anchor": "skill--decision-table",
+      "family": "skill",
+      "kind": "section",
+      "title": "Decision table",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 22,
+      "tag": "Empirical/Declared"
+    },
+    {
+      "anchor": "skill--the-two-step-pattern-this-is-the-token-efficient-way-to-use-it",
+      "family": "skill",
+      "kind": "section",
+      "title": "The two-step pattern (this is the token-efficient way to use it)",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 34,
+      "tag": "Empirical/Declared",
+      "summary": "1. search(text=\"runner isolation\") — a handful of compact hits (anchor, title, kind, score"
+    },
+    {
+      "anchor": "skill--example-calls-real-shapes-from-the-live-32-item-workspace-dev-docs-index",
+      "family": "skill",
+      "kind": "section",
+      "title": "Example calls (real shapes, from the live 32-item workspace dev-docs index)",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 47,
+      "tag": "Empirical/Declared",
+      "summary": "search(text=\"hygiene\") — 7 hits, compact default:"
+    },
+    {
+      "anchor": "skill--auth",
+      "family": "skill",
+      "kind": "section",
+      "title": "Auth",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 93,
+      "tag": "Empirical/Declared",
+      "summary": "Every call needs a token argument (a bearer string from the server's TEROTOKENS). This skill"
+    },
+    {
+      "anchor": "skill--what-not-to-do",
+      "family": "skill",
+      "kind": "section",
+      "title": "What NOT to do",
+      "file": ".claude/skills/tero-search/SKILL.md",
+      "line": 100,
+      "tag": "Empirical/Declared",
+      "summary": "- Don't retry the same failed search with cosmetic rewordings hoping for a different refusal — a"
     }
   ],
   "flagged": []

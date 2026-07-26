@@ -1,20 +1,29 @@
-"""Rust-source-derived parity tests.
+"""Rust-transport parity + intentional tool-surface divergence (0.3.0).
 
-Each expected value below is transcribed **verbatim** from the Rust reference this package mirrors
-(`crates/mycelium-tero/src/{bin/tero-mcp.rs,front/mcp.rs,front/core.rs,front/auth.rs,query.rs}` in
-the `mycelium` repo) — not paraphrased or re-derived from the Python implementation. A test failing
-here means the Python server's wire-visible shape/wording has drifted from the Rust one, which is
-exactly the byte-level parity this suite exists to catch (this package's own "Framework — remaining
-tasks: byte-level parity harness" item in README.md — this is the practical version of it: no
-checked-out Rust source available at Python test time, so the expected values are pinned here as a
-transcription instead of a live differential).
+Through 0.2.x this suite pinned the *tool descriptors* verbatim from the Rust reference
+(`crates/mycelium-tero/src/{bin/tero-mcp.rs,front/mcp.rs}` in the `mycelium` repo) as well as the
+transport-level shapes. As of 0.3.0 the tool surface is **deliberately no longer byte-identical** to
+Rust: `query_by_id`/`query_by_status`/`query_by_kind`/`text_search` merged into one composable
+`search` tool, and `cite`/`explain` were reshaped around a `ref`/`query` split — see README.md "Tool
+surface (0.3.0 redesign)" for the full rationale (token-efficiency: four single-predicate schemas
+that couldn't compose, replaced by one that can and pages/projects by default).
 
-If the Rust source changes, re-transcribe the affected constant here in the same commit.
+What's kept pinned here, because it's still shared and still matters if it silently drifts:
+
+- the JSON-RPC transport shape (newline-delimited 2.0, `initialize`/`tools/list`/`tools/call`/`ping`)
+- the JSON-RPC error code mapping (`FrontError::jsonrpc_code`)
+- the auth-error message wording
+- the refusal-envelope *shape* (`kind`/`refusal`/`message`) and the variant tags this server itself
+  defines (`no_match`, `unknown_anchor`, `empty_page` — the last two are new/renamed in 0.3.0 and are
+  **not** claimed to match Rust; only `unknown_anchor`, which `cross_ref` still shares unmodified with
+  the Rust engine, is transcribed from Rust)
+- the process exit codes
+
+If a future Rust-side change moves the transport/error/exit-code layer, re-transcribe the affected
+constant here in the same commit — same discipline as before, just a narrower surface.
 """
 
 from __future__ import annotations
-
-import json
 
 import pytest
 
@@ -22,151 +31,53 @@ from tero_mcp_lite.auth import AuthError, Scope
 from tero_mcp_lite.core import FrontError
 from tero_mcp_lite.mcp_server import TOOL_REGISTRY, _tool_descriptors
 
-# ── tool descriptors — transcribed from front/mcp.rs::tool_descriptors() (with categories) ────────
-#
-# Categories (introspection/query/explain/maintenance) are part of the dynamic surface
-# (exposed by --describe and tools/list). Field order matches Rust json! exactly.
-# See tero-rs/crates/mycelium-tero/src/front/mcp.rs and workspace tero polish (tpol).
-
-_TOK = {"type": "string", "description": "bearer token (from TERO_TOKENS)"}
-
-RUST_TOOL_DESCRIPTORS: list[dict] = [
-    {
-        "name": "identify",
-        "description": "Server identity, version, and whether the Layer-2 gate is open.",
-        "category": "introspection",
-        "inputSchema": {
-            "type": "object",
-            "properties": {"token": _TOK},
-            "required": ["token"],
-        },
-    },
-    {
-        "name": "query_by_id",
-        "description": "Exact lookup by corpus id (RFC-0034, M-1015, DN-87, an issue id).",
-        "category": "query",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "value": {"type": "string", "description": "the id to match"},
-                "token": _TOK,
-            },
-            "required": ["value", "token"],
-        },
-    },
-    {
-        "name": "query_by_status",
-        # Rust source literally uses the Unicode ellipsis character U+2026, not ASCII "...".
-        "description": "All rows with a given status (Accepted, todo, done, …).",
-        "category": "query",
-        "inputSchema": {
-            "type": "object",
-            "properties": {"value": {"type": "string"}, "token": _TOK},
-            "required": ["value", "token"],
-        },
-    },
-    {
-        "name": "query_by_kind",
-        "description": "All rows of a given kind (rfc, adr, note, issue, section, …).",
-        "category": "query",
-        "inputSchema": {
-            "type": "object",
-            "properties": {"value": {"type": "string"}, "token": _TOK},
-            "required": ["value", "token"],
-        },
-    },
-    {
-        "name": "cross_ref",
-        "description": "Breadth-first walk of depends_on/doc_refs edges from a start id/anchor.",
-        "category": "query",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "start": {"type": "string"},
-                "depth": {"type": "string", "description": "hop count (default 1)"},
-                "token": _TOK,
-            },
-            "required": ["start", "token"],
-        },
-    },
-    {
-        "name": "text_search",
-        "description": "Ranked free-text search over id/title/summary.",
-        "category": "query",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "value": {"type": "string", "description": "the query text"},
-                "token": _TOK,
-            },
-            "required": ["value", "token"],
-        },
-    },
-    {
-        "name": "cite",
-        "description": "Citations only for a query (kind + its args, as query_*).",
-        "category": "explain",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "kind": {
-                    "type": "string",
-                    "description": "id|status|kind|cross_ref|text",
-                },
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": _TOK,
-            },
-            "required": ["kind", "token"],
-        },
-    },
-    {
-        "name": "explain",
-        "description": "EXPLAIN trace only for a query (kind + its args, as query_*).",
-        "category": "explain",
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "kind": {"type": "string"},
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": _TOK,
-            },
-            "required": ["kind", "token"],
-        },
-    },
-    {
-        "name": "refresh",
-        "description": "Reload the served index from disk (requires the `refresh` scope).",
-        "category": "maintenance",
-        "inputSchema": {
-            "type": "object",
-            "properties": {"token": _TOK},
-            "required": ["token"],
-        },
-    },
-]
+# ── tool surface — 0.3.0 divergence, asserted honestly rather than pinned to Rust ──────────────────
 
 
-def test_tool_names_and_count_match_rust() -> None:
-    assert [t["name"] for t in RUST_TOOL_DESCRIPTORS] == list(TOOL_REGISTRY.keys())
-    assert len(TOOL_REGISTRY) == 9  # the nine tero-mcp operations, front::mcp.rs
-
-
-def test_tool_descriptor_values_match_rust() -> None:
-    assert _tool_descriptors() == RUST_TOOL_DESCRIPTORS
-
-
-def test_tool_descriptor_order_matches_rust() -> None:
-    """Value equality (above) doesn't catch key-order drift (dict `==` ignores order) — a
-    `json.dumps` round trip with `sort_keys=False` does, matching how `serde_json`'s
-    `preserve_order` feature renders the Rust `json!` literals (incl. "category").
+def test_tool_surface_is_six_tools_not_nine() -> None:
+    """The 0.3.0 count: identify, search, cross_ref, cite, explain, refresh. Four single-predicate
+    query tools (query_by_id/query_by_status/query_by_kind/text_search) collapsed into `search` —
+    see module docstring. This test exists so the *count* (and therefore the merge) doesn't silently
+    regress back to nine, not to claim any particular number is sacred.
     """
-    actual = json.dumps(_tool_descriptors(), sort_keys=False)
-    expected = json.dumps(RUST_TOOL_DESCRIPTORS, sort_keys=False)
-    assert actual == expected
+    assert list(TOOL_REGISTRY.keys()) == [
+        "identify",
+        "search",
+        "cross_ref",
+        "cite",
+        "explain",
+        "refresh",
+    ]
+    assert len(TOOL_REGISTRY) == 6
+
+
+def test_search_schema_is_tiered_not_flat() -> None:
+    """The whole point of the redesign: a caller reading `search`'s schema sees one obvious
+    argument (`text`) plus a short flat filter list, with everything rarer nested one level down —
+    not fifteen flat optionals paid for on every request. Pin the tier boundary itself."""
+    props = TOOL_REGISTRY["search"].descriptor()["inputSchema"]["properties"]
+    tier1_and_2 = {"text", "id", "kind", "family", "limit"}
+    assert tier1_and_2 <= props.keys()
+    assert "advanced" in props
+    assert props["advanced"]["type"] == "object"
+    rare = {"status", "tag", "offset", "fields", "format", "order"}
+    assert rare <= props["advanced"]["properties"].keys()
+    # None of the rare fields leak into the flat top level — that's the cost this test guards.
+    assert rare.isdisjoint(props.keys())
+
+
+def test_cite_and_explain_take_a_ref_or_a_nested_query_not_the_full_predicate_list() -> None:
+    for name in ("cite", "explain"):
+        props = TOOL_REGISTRY[name].descriptor()["inputSchema"]["properties"]
+        assert set(props.keys()) == {"ref", "query", "token"}
+
+
+def test_only_token_is_ever_required() -> None:
+    """search/cite/explain all default to the cheap browse/no-op-without-a-ref case; nothing beyond
+    the bearer token is mandatory at the schema level (matching the "a call with only its required
+    argument should do the most useful cheap thing" design goal)."""
+    for name in ("search", "cite", "explain"):
+        assert TOOL_REGISTRY[name].descriptor()["inputSchema"]["required"] == ["token"]
 
 
 # ── JSON-RPC error code mapping — transcribed from front/core.rs FrontError::jsonrpc_code() ───────
@@ -211,27 +122,39 @@ def test_auth_insufficient_scope_message_matches_rust() -> None:
     assert e.code == "forbidden"
 
 
-# ── refusal variant tags — transcribed from query.rs's `#[serde(tag = "variant", ...)]` enum ──────
-
-RUST_REFUSAL_VARIANTS = {"no_match", "unknown_anchor", "no_text_match"}
+# ── refusal envelope shape + the one variant tag still shared verbatim with Rust ───────────────────
 
 
-def test_refusal_variant_tags_match_rust() -> None:
+def test_refusal_envelope_shape_is_stable() -> None:
     from tero_mcp_lite.query import Refusal
 
-    # Construct one of each and check the wire tag — the Rust enum's `#[serde(rename_all =
-    # "snake_case")]` on NoMatch/UnknownAnchor/NoTextMatch renders exactly these three strings.
-    assert (
-        Refusal("no_match", query="x", candidates_scanned=0).to_dict()["variant"]
-        == "no_match"
-    )
+    r = Refusal("no_match", query="x", candidates_scanned=0)
+    d = r.to_dict()
+    assert d["variant"] == "no_match"
+    assert "query" in d and "candidates_scanned" in d
+
+
+def test_cross_ref_unknown_anchor_variant_still_matches_rust() -> None:
+    """cross_ref is unmodified by the 0.3.0 redesign — its refusal variant tag is still the Rust
+    `query.rs` `#[serde(rename_all = "snake_case")]` `UnknownAnchor` string, transcribed verbatim."""
+    from tero_mcp_lite.query import Refusal
+
     assert (
         Refusal("unknown_anchor", start="x", candidates_scanned=0).to_dict()["variant"]
         == "unknown_anchor"
     )
+
+
+def test_new_0_3_0_refusal_variants_are_not_claimed_as_rust_parity() -> None:
+    """`empty_page` is new in 0.3.0 (search's paging honesty rule) and has no Rust twin — this test
+    just documents that fact so nobody later "fixes" it into a false parity claim."""
+    from tero_mcp_lite.query import Refusal
+
     assert (
-        Refusal("no_text_match", query="x", candidates_scanned=0).to_dict()["variant"]
-        == "no_text_match"
+        Refusal(
+            "empty_page", query="x", candidates_scanned=0, candidates_matched=0, limit=10, offset=10
+        ).to_dict()["variant"]
+        == "empty_page"
     )
 
 
@@ -242,3 +165,13 @@ def test_exit_codes_match_rust() -> None:
     from tero_mcp_lite import EX_CONFIG, EX_IO, EX_OK, EX_USAGE
 
     assert (EX_OK, EX_USAGE, EX_IO, EX_CONFIG) == (0, 64, 66, 78)
+
+
+# ── transport shape — unchanged by the 0.3.0 redesign ───────────────────────────────────────────────
+
+
+def test_tools_list_descriptor_shape_has_the_expected_keys() -> None:
+    for d in _tool_descriptors():
+        assert set(d.keys()) == {"name", "description", "category", "inputSchema"}
+        assert d["inputSchema"]["type"] == "object"
+        assert isinstance(d["inputSchema"]["required"], list)

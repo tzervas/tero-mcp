@@ -1,15 +1,24 @@
 """The MCP front: a Model Context Protocol server over stdio — the Python twin of
 `crates/mycelium-tero/src/front/mcp.rs`. Speaks newline-delimited JSON-RPC 2.0 (one compact JSON
-object per line), matching the Rust server's transport, tool surface, and semantics.
+object per line), matching the Rust server's transport and JSON-RPC envelope shapes, but — as of
+0.3.0 — **not** its tool surface; see README.md "Tool surface (0.3.0 redesign)" for why and what
+changed.
 
-**Tools** (one per engine operation) are advertised by `tools/list` and invoked by `tools/call`. An
-answer/refusal is returned as an `isError:false` tool result whose `text` is the compact
-[`tero_mcp_lite.core`] envelope; a refusal is a first-class result, not a protocol error. Only a
-malformed/unauthorized/unknown call is a JSON-RPC error.
+**Tools** (six, down from nine — see README) are advertised by `tools/list` and invoked by
+`tools/call`. An answer/refusal is returned as an `isError:false` tool result whose `text` is the
+compact [`tero_mcp_lite.core`] envelope; a refusal is a first-class result, not a protocol error.
+Only a malformed/unauthorized/unknown call is a JSON-RPC error.
 
 **Auth.** Each `tools/call` carries a `token` argument (the bearer, checked against `TERO_TOKENS`);
 it is authorized against the operation's required scope before dispatch — matching the Rust server's
-per-call (not per-transport-connection) auth model exactly.
+per-call (not per-transport-connection) auth model.
+
+**Schema tiering.** `tools/list` puts every tool's full schema in front of the calling model on every
+request where the server is loaded — that's a recurring cost, not a one-time one. `search`'s schema
+is tiered accordingly: one obvious required-feeling argument (`text`) for the common case, four short
+flat filters for the next-most-common case, and one nested `advanced` object for everything else
+(paging past the first page, field projection, output format, explicit ordering) — a caller (model or
+human) reading the schema sees "you probably just need `text`", which is the point.
 
 **Extensibility — the tool registry.** Every tool is one declarative [`ToolSpec`] entry in
 [`TOOL_REGISTRY`]: a name, its `tools/list` JSON-Schema pieces (`properties`/`required`), the scope
@@ -39,9 +48,11 @@ from .core import (
     lite_memory_tool_refusal,
     parse_query,
     required_scope,
+    resolve_cite_explain_query,
     run_and_envelope,
 )
 from .model import TeroIndexReport, load_report
+from .query import DEFAULT_SEARCH_LIMIT, MAX_SEARCH_LIMIT
 
 SERVER_NAME = "tero-mcp-lite"
 PROTOCOL_VERSION = "2025-06-18"
@@ -96,18 +107,6 @@ class ToolSpec:
         }
 
 
-def _query(
-    state: McpState,
-    kind: str,
-    value: str | None,
-    start: str | None,
-    depth: str | None,
-    view: str,
-) -> dict[str, Any]:
-    q = parse_query(kind, value, start, depth)
-    return run_and_envelope(state.report, q, view)
-
-
 def _handle_identify(state: McpState, _args: dict[str, Any]) -> dict[str, Any]:
     return identify_value(state.report, str(state.index_path))
 
@@ -121,41 +120,139 @@ def _handle_refresh(state: McpState, _args: dict[str, Any]) -> dict[str, Any]:
     return {"kind": "refreshed", "ok": True, "items": len(fresh.items)}
 
 
-def _fixed_kind_handler(kind: str, view: str) -> ToolHandler:
-    """A handler for a tool whose query `kind` is fixed by the tool itself (`query_by_id` is always
-    `kind="id"`, etc.) — the args just supply the kind's own value/start/depth. Mirrors
-    `front::mcp::dispatch`'s per-tool `query(state, "<kind>", ...)` calls in the Rust server.
+def _flatten_search_args(args: dict[str, Any]) -> dict[str, Any]:
+    """Merge `search`'s tier-2 flat filters with its tier-3 `advanced` object into the flat dict
+    `Query.parse("search", ...)` expects. Tier-2 args win on a (deliberately impossible, since the
+    two tiers don't share key names) collision.
     """
+    flat = {k: v for k, v in args.items() if k != "advanced"}
+    advanced = args.get("advanced")
+    if advanced is not None:
+        if not isinstance(advanced, dict):
+            raise FrontError.bad_request("`advanced` must be an object")
+        flat.update(advanced)
+    return flat
 
-    def handler(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
-        return _query(
-            state, kind, args.get("value"), args.get("start"), args.get("depth"), view
-        )
 
-    return handler
+def _handle_search(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+    q = parse_query("search", _flatten_search_args(args))
+    return run_and_envelope(state.report, q, VIEW_FULL)
 
 
-def _arg_kind_handler(view: str) -> ToolHandler:
-    """A handler for a tool whose query `kind` is itself an argument (`cite`/`explain` take
-    `kind` + that kind's own args, mirroring `query_by_*`).
-    """
+def _handle_cross_ref(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+    q = parse_query("cross_ref", args)
+    return run_and_envelope(state.report, q, VIEW_FULL)
 
-    def handler(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
-        return _query(
-            state,
-            args.get("kind") or "",
-            args.get("value"),
-            args.get("start"),
-            args.get("depth"),
-            view,
-        )
 
-    return handler
+def _handle_cite(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+    q = resolve_cite_explain_query(args)
+    return run_and_envelope(state.report, q, VIEW_CITE)
+
+
+def _handle_explain(state: McpState, args: dict[str, Any]) -> dict[str, Any]:
+    q = resolve_cite_explain_query(args)
+    return run_and_envelope(state.report, q, VIEW_EXPLAIN)
+
+
+# ── search's tiered schema ──────────────────────────────────────────────────────────────────────
+
+_SEARCH_ADVANCED_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "rare/paging options — most calls don't need this object at all",
+    "properties": {
+        "status": {
+            "type": "string",
+            "description": "exact status match, case-insensitive (e.g. Accepted, todo, done)",
+        },
+        "tag": {
+            "type": "string",
+            "description": "exact match on the row's extraction-honesty tag",
+        },
+        "offset": {
+            "type": "integer",
+            "description": "paging offset into the *matched* set, default 0",
+        },
+        "fields": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "project each returned row to only these field names (anchor is always included); "
+                "default in format=compact is [anchor,title,kind,score]"
+            ),
+        },
+        "format": {
+            "type": "string",
+            "description": (
+                "'compact' (default: trimmed fields, no per-hit EXPLAIN detail) or 'full' (every "
+                "row field, full EXPLAIN hits) — citations are always full-shape in either format"
+            ),
+        },
+        "order": {
+            "type": "string",
+            "description": (
+                "'auto' (default: relevance when `text` is given, else canonical), 'relevance', "
+                "or 'canonical' (force stable family/file/line/anchor order even with `text`)"
+            ),
+        },
+    },
+    "required": [],
+}
+
+_SEARCH_PROPERTIES: dict[str, Any] = {
+    "text": {
+        "type": "string",
+        "description": (
+            "free-text over id/title/summary, ranked — the common case: search(text=\"runner "
+            "isolation\") is a complete call on its own"
+        ),
+    },
+    "id": {"type": "string", "description": "exact corpus id filter (e.g. RFC-0034, M-1015)"},
+    "kind": {
+        "type": "string",
+        "description": "exact kind filter, case-insensitive (rfc, adr, note, section, issue, …)",
+    },
+    "family": {
+        "type": "string",
+        "description": "exact family filter: doc|research|issue|changelog|skill",
+    },
+    "limit": {
+        "type": "integer",
+        "description": f"max rows returned (default {DEFAULT_SEARCH_LIMIT}, hard cap {MAX_SEARCH_LIMIT})",
+    },
+    "advanced": _SEARCH_ADVANCED_SCHEMA,
+    "token": TOKEN_ARG,
+}
+
+_CITE_EXPLAIN_QUERY_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "the same shape `search` takes (or `start`/`depth` for a cross_ref trace) — only for the rarer 'cite/explain a fresh query' case",
+    "properties": {
+        "text": {"type": "string"},
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "family": {"type": "string"},
+        "status": {"type": "string"},
+        "tag": {"type": "string"},
+        "limit": {"type": "integer"},
+        "offset": {"type": "integer"},
+        "start": {"type": "string", "description": "set this for a cross_ref trace instead of a search"},
+        "depth": {"type": "integer"},
+    },
+}
+
+_CITE_EXPLAIN_PROPERTIES: dict[str, Any] = {
+    "ref": {
+        "type": "string",
+        "description": "the common case: a known anchor or id (e.g. from an earlier search/cross_ref hit)",
+    },
+    "query": _CITE_EXPLAIN_QUERY_SCHEMA,
+    "token": TOKEN_ARG,
+}
 
 
 def _build_registry() -> dict[str, ToolSpec]:
-    """Build [`TOOL_REGISTRY`] in `tools/list` order (matches `front::mcp::tool_descriptors`'s
-    order in the Rust server exactly — a plain Python `dict` preserves insertion order).
+    """Build [`TOOL_REGISTRY`] in `tools/list` order — a plain Python `dict` preserves insertion
+    order.
     """
     specs = [
         ToolSpec(
@@ -167,32 +264,17 @@ def _build_registry() -> dict[str, ToolSpec]:
             category="introspection",
         ),
         ToolSpec(
-            name="query_by_id",
-            description="Exact lookup by corpus id (RFC-0034, M-1015, DN-87, an issue id).",
-            properties={
-                "value": {"type": "string", "description": "the id to match"},
-                "token": TOKEN_ARG,
-            },
-            required=("value", "token"),
-            handler=_fixed_kind_handler("id", VIEW_FULL),
-            category="query",
-        ),
-        ToolSpec(
-            name="query_by_status",
-            description="All rows with a given status (Accepted, todo, done, …).",
-            properties={"value": {"type": "string"}, "token": TOKEN_ARG},
-            required=("value", "token"),
-            handler=_fixed_kind_handler("status", VIEW_FULL),
-            category="query",
-        ),
-        ToolSpec(
-            name="query_by_kind",
+            name="search",
             description=(
-                "All rows of a given kind (rfc, adr, note, issue, section, …)."
+                "Composable corpus search: search(text) alone answers ~most calls. Add id/kind/"
+                "family/limit for common filters (all AND-ed with text); everything rarer (offset, "
+                "field projection, output format, explicit ordering, status/tag filters) lives in "
+                "`advanced`. Returns compact, field-projected hits with resolvable citations by "
+                "default — pass advanced.format='full' for complete rows."
             ),
-            properties={"value": {"type": "string"}, "token": TOKEN_ARG},
-            required=("value", "token"),
-            handler=_fixed_kind_handler("kind", VIEW_FULL),
+            properties=_SEARCH_PROPERTIES,
+            required=("token",),
+            handler=_handle_search,
             category="query",
         ),
         ToolSpec(
@@ -204,49 +286,30 @@ def _build_registry() -> dict[str, ToolSpec]:
                 "token": TOKEN_ARG,
             },
             required=("start", "token"),
-            handler=_fixed_kind_handler("cross_ref", VIEW_FULL),
-            category="query",
-        ),
-        ToolSpec(
-            name="text_search",
-            description="Ranked free-text search over id/title/summary.",
-            properties={
-                "value": {"type": "string", "description": "the query text"},
-                "token": TOKEN_ARG,
-            },
-            required=("value", "token"),
-            handler=_fixed_kind_handler("text", VIEW_FULL),
+            handler=_handle_cross_ref,
             category="query",
         ),
         ToolSpec(
             name="cite",
-            description="Citations only for a query (kind + its args, as query_*).",
-            properties={
-                "kind": {
-                    "type": "string",
-                    "description": "id|status|kind|cross_ref|text",
-                },
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": TOKEN_ARG,
-            },
-            required=("kind", "token"),
-            handler=_arg_kind_handler(VIEW_CITE),
+            description=(
+                "Citations only, no item bodies — the cheapest way to get a resolvable citation. "
+                "cite(ref=<anchor-or-id>) for a row you already found; cite(query={...}) (same shape "
+                "as search, or start/depth for cross_ref) only for citing a fresh query's results."
+            ),
+            properties=_CITE_EXPLAIN_PROPERTIES,
+            required=("token",),
+            handler=_handle_cite,
             category="explain",
         ),
         ToolSpec(
             name="explain",
-            description="EXPLAIN trace only for a query (kind + its args, as query_*).",
-            properties={
-                "kind": {"type": "string"},
-                "value": {"type": "string"},
-                "start": {"type": "string"},
-                "depth": {"type": "string"},
-                "token": TOKEN_ARG,
-            },
-            required=("kind", "token"),
-            handler=_arg_kind_handler(VIEW_EXPLAIN),
+            description=(
+                "The EXPLAIN trace only (why these rows, in what order) — no item bodies. "
+                "explain(ref=<anchor-or-id>) or explain(query={...}), same shape as `cite`."
+            ),
+            properties=_CITE_EXPLAIN_PROPERTIES,
+            required=("token",),
+            handler=_handle_explain,
             category="explain",
         ),
         ToolSpec(
@@ -343,10 +406,12 @@ def _initialize_result() -> dict[str, Any]:
         "capabilities": {"tools": {"listChanged": False}},
         "instructions": (
             "tero-mcp-lite: a lightweight Python MCP front over a Tero Layer-1 corpus index. "
-            "tools/list, then tools/call with a `token` argument (from TERO_TOKENS). Every answer "
-            "carries resolvable citations + an EXPLAIN trace; a query that finds nothing citable is "
-            "a typed refusal, not an empty answer. Layer-2 (VSA) is not implemented in this lite "
-            "server — see the full Rust tero-mcp for that."
+            "tools/list, then tools/call with a `token` argument (from TERO_TOKENS). Start with "
+            "search(text=...) — it defaults to compact, field-projected, resolvably-cited results; "
+            "follow up with cite(ref=...)/explain(ref=...)/cross_ref(start=...) on the anchor you "
+            "want more on. Every answer carries resolvable citations + an EXPLAIN trace; a query "
+            "that finds nothing citable is a typed refusal, not an empty answer. Layer-2 (VSA) is "
+            "not implemented in this lite server — see the full Rust tero-mcp for that."
         ),
     }
 

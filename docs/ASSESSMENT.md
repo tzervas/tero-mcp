@@ -75,3 +75,15 @@ Cabal already wires opt-in `--use-tero` / `USE_TERO`; must surface errors (not s
 - [ROADMAP.md](ROADMAP.md) — waves + API plan  
 - [../README.md](../README.md) — install and tools  
 - [../GENERATING-AN-INDEX.md](../GENERATING-AN-INDEX.md) — index build  
+
+## 7. Tool-surface redesign (2026-07-25, appended)
+
+Superseding the "5" row and "nine tools" language above (§2): as of **0.3.0** the tool surface is
+**six tools** (`identify`, `search`, `cross_ref`, `cite`, `explain`, `refresh`) — the four
+single-predicate query tools merged into one composable `search`. This is a **deliberate divergence**
+from the Rust `tero-mcp` tool surface, not a bug — see README.md "Tool surface (0.3.0 redesign)" and
+CHANGELOG.md `[0.3.0]`. The driver was measured token cost: the live 32-item dev-docs index made a
+full-envelope query cost more than reading the source doc directly (README.md "Token-efficiency
+verdict") — an index-coverage gap this change documents and proposes against but does not close (§4's
+"Index generation not in-repo" gap is now sharper: a concrete 399-item/40-file dry run exists in
+README.md "Index coverage", unexecuted).

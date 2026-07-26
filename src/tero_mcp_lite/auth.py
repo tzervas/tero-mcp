@@ -11,12 +11,18 @@
   open table) when no tokens are configured; the server surfaces it on stderr and exits non-zero.
   There is no anonymous default (matches the Rust server's `TokenTable::from_env` contract exactly).
 
-Honesty (VR-5): this is a `Declared` mechanism, same as the Rust side — a plain dict lookup is not a
-constant-time comparison; no cryptographic guarantee is claimed.
+Honesty (VR-5): this is a `Declared` mechanism, same as the Rust side — [`TokenTable.authorize`]
+compares the presented token against *every* configured token with `hmac.compare_digest` (never a
+short-circuiting `dict.get`/`==`) specifically to avoid a hash/equality-lookup timing signal, but
+that is a best-effort mitigation, not a cryptographic guarantee: this server's threat model is a
+single-user, LAN-local stdio process (spawned by an MCP client on the same machine), where a remote
+timing attack over the wire isn't a reachable attack surface to begin with. If this front ever grows
+a network transport (the planned HTTP front, README "Framework — remaining tasks"), re-examine this.
 """
 
 from __future__ import annotations
 
+import hmac
 import os
 from dataclasses import dataclass
 from enum import Enum
@@ -135,7 +141,13 @@ class TokenTable:
         """
         if presented is None:
             raise AuthError("missing")
-        have = self._tokens.get(presented)
+        # Constant-time-ish membership check: compare against every configured token rather than a
+        # short-circuiting dict lookup (see module docstring "Honesty" note on what this does and
+        # does not guarantee).
+        have: Scope | None = None
+        for tok, scope in self._tokens.items():
+            if hmac.compare_digest(presented.encode("utf-8"), tok.encode("utf-8")):
+                have = scope
         if have is None:
             raise AuthError("invalid")
         if not have.allows(required):

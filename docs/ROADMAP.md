@@ -101,3 +101,21 @@ Per plan.md + user: semver + releases for packages writ large. Local builds/podm
 - For rust sub-crates in ./rust/ : versions tracked via parent for now (tero-rs no standalone git here).
 
 Next bumps: hygiene gate, update-tero, append docs.
+
+## Tool-surface redesign — token efficiency (2026-07-25, appended)
+
+0.3.0: merged `query_by_id`/`query_by_status`/`query_by_kind`/`text_search` into one composable
+`search` tool (tiered schema: `text`/`id`/`kind`/`family`/`limit` flat, `status`/`tag`/`offset`/
+`fields`/`format`/`order` nested under `advanced`); reshaped `cite`/`explain` around `ref`/`query`.
+Nine tools -> six. Deliberately diverges from the Rust `tero-mcp` tool surface (transport/error layer
+still shared) — see README.md "Tool surface (0.3.0 redesign)" and CHANGELOG.md `[0.3.0]`.
+
+Driver: measured that the live 32-item dev-docs index made a full-envelope query more expensive in
+tokens than reading the source doc directly — see README.md "Token-efficiency verdict". Compact
+defaults cut per-call bytes 44-71% on the same index; the harder problem (index coverage) is proposed,
+not solved, in README.md "Index coverage" — a concrete dry-run against `/root/git/*.md` measured 399
+items from 40 files with the existing generator, unexecuted pending a human call on which repo/index
+should own that corpus.
+
+Not done in this wave: re-syncing `tero-rs` (Rust) to the same tool surface; executing the index-
+coverage proposal; an HTTP front (Wave 2, still open). See README.md "Framework — remaining tasks".
