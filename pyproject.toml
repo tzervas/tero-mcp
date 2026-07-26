@@ -1,6 +1,6 @@
 [project]
 name = "tero-mcp-lite"
-version = "0.2.0"
+version = "0.3.0"
 description = "A lightweight, portable MCP (Model Context Protocol) server over a Tero corpus index.json — the Python-only counterpart to mycelium-tero's Rust tero-mcp front."
 readme = "README.md"
 license = "MIT"

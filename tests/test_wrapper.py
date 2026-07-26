@@ -315,7 +315,14 @@ def test_wrapper_missing_rust_bin_falls_back_to_lite(monkeypatch: pytest.MonkeyP
 
 
 def test_wrapper_rust_path_query_by_id_and_refusal(index_path: Path) -> None:
-    """A positive lookup + a typed refusal over the Rust path via wrapper."""
+    """A positive lookup + a typed refusal over the Rust path via wrapper.
+
+    Rust (`tero-rs`, a separate crate/repo) still serves the pre-0.3.0 nine-tool surface — it was
+    not touched by the Python lite tool-surface redesign (see README.md "Tool surface (0.3.0
+    redesign)" for why, and the "Matching the Rust server" caveat on the resulting fork). This test
+    validates the *unchanged* Rust path with its own unchanged tool names; `test_wrapper_search_hit_
+    and_refusal` below covers the equivalent case for the new lite-only `search` tool.
+    """
     _require_rust_binary()
     # query_by_id hit
     hit = json.dumps(
@@ -339,6 +346,45 @@ def test_wrapper_rust_path_query_by_id_and_refusal(index_path: Path) -> None:
             "id": 11,
             "method": "tools/call",
             "params": {"name": "query_by_id", "arguments": {"value": "NO-SUCH-THING-XYZ", "token": "local-dev"}},
+        }
+    )
+    rc, resps, _ = _run_wrapper(index=index_path, input_jsonrpc=miss)
+    assert rc == 0
+    env = json.loads(resps[0]["result"]["content"][0]["text"])
+    assert env["kind"] == "refusal"
+    assert env["refusal"]["variant"] in {"no_match", "unknown_anchor"}
+
+
+def test_wrapper_search_hit_and_refusal(index_path: Path) -> None:
+    """The same positive-lookup + typed-refusal shape as the Rust-path test above, but for the new
+    lite-only `search` tool — skipped rather than failed if a discovered Rust binary would silently
+    swallow the call with "unknown tool" (it predates 0.3.0's `search`, see module-level docstring)."""
+    if _resolve_rust_binary() is not None:
+        pytest.skip(
+            "a discovered tero-rs binary predates 0.3.0's `search` tool and would reject this "
+            "call with 'unknown tool' — this test is specifically about the lite-only surface"
+        )
+    hit = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": 10,
+            "method": "tools/call",
+            "params": {"name": "search", "arguments": {"id": "RFC-0034", "token": "local-dev"}},
+        }
+    )
+    rc, resps, _ = _run_wrapper(index=index_path, input_jsonrpc=hit)
+    assert rc == 0
+    env = json.loads(resps[0]["result"]["content"][0]["text"])
+    assert env["kind"] == "answer"
+    assert env["items"][0]["anchor"] == "rfc-0034"
+
+    # unknown -> refusal, never silent
+    miss = json.dumps(
+        {
+            "jsonrpc": "2.0",
+            "id": 11,
+            "method": "tools/call",
+            "params": {"name": "search", "arguments": {"id": "NO-SUCH-THING-XYZ", "token": "local-dev"}},
         }
     )
     rc, resps, _ = _run_wrapper(index=index_path, input_jsonrpc=miss)
@@ -417,23 +463,37 @@ def test_wrapper_unauthorized_call_is_jsonrpc_error_not_tool_result(index_path: 
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Runtime parity between Rust (primary) and Python lite (fallback) — regression guard
-# These ensure that for Layer-1 operations the observable envelopes stay in sync.
-# (When Layer-2 opens in Rust the lite path will intentionally differ on those calls.)
+# Runtime consistency of the wrapper's own backend-selection branch — regression guard.
+#
+# Pre-0.3.0 this compared the *default* (prefer-Rust) path against the *force-lite* path and
+# asserted the observable envelopes matched, because both backends spoke the same nine-tool
+# surface. As of 0.3.0 that's no longer true by design (README.md "Tool surface (0.3.0 redesign)":
+# `search` replaces the four old query_by_*/text_search tools and exists on the Python lite side
+# only — a Rust binary built against the pre-0.3.0 surface does not understand `search` at all).
+# So this test now only asserts real parity when it's actually comparing the *same* backend (which
+# is what happens in every environment that doesn't have a tero-rs binary built against the new
+# surface, including this one) — and explicitly skips rather than silently passing a meaningless
+# comparison when a stale-surface Rust binary is present, so a future re-sync of the Rust side is
+# what turns this back into a real cross-backend check.
 # ──────────────────────────────────────────────────────────────────────────────
 
 def _extract_envelope(resp: dict) -> dict:
     return json.loads(resp["result"]["content"][0]["text"])
 
 
-def test_rust_vs_lite_parity_on_fixture_queries(index_path: Path) -> None:
-    """Same queries via force-lite Python and default Rust; core fields must match for L1."""
-    _require_rust_binary()
+def test_default_and_force_lite_agree_when_both_resolve_to_lite(index_path: Path) -> None:
+    if _resolve_rust_binary() is not None:
+        pytest.skip(
+            "a tero-rs binary is discoverable in this environment; it predates the 0.3.0 "
+            "`search` tool surface, so comparing it against lite here would fail for a reason "
+            "unrelated to this test's purpose (see docstring above) — a live differential against "
+            "a *resynced* Rust binary is future work, not this test"
+        )
     queries = [
-        ("query_by_id", {"value": "RFC-0034"}),
-        ("query_by_status", {"value": "done"}),
-        ("text_search", {"value": "transparency"}),
-        ("query_by_kind", {"value": "issue"}),
+        ("search", {"id": "RFC-0034"}),
+        ("search", {"status": "done"}),
+        ("search", {"text": "transparency"}),
+        ("search", {"kind": "issue"}),
     ]
     for tool, args in queries:
         call = {
@@ -444,27 +504,23 @@ def test_rust_vs_lite_parity_on_fixture_queries(index_path: Path) -> None:
         }
         req = json.dumps(call)
 
-        rc_r, res_r, _ = _run_wrapper(index=index_path, input_jsonrpc=req)
-        rc_l, res_l, _ = _run_wrapper(index=index_path, input_jsonrpc=req, force_lite=True)
-        assert rc_r == 0 and rc_l == 0
+        rc_a, res_a, _ = _run_wrapper(index=index_path, input_jsonrpc=req)
+        rc_b, res_b, _ = _run_wrapper(index=index_path, input_jsonrpc=req, force_lite=True)
+        assert rc_a == 0 and rc_b == 0
 
-        env_r = _extract_envelope(res_r[0])
-        env_l = _extract_envelope(res_l[0])
+        env_a = _extract_envelope(res_a[0])
+        env_b = _extract_envelope(res_b[0])
 
-        # Both must be same kind (answer or refusal)
-        assert env_r.get("kind") == env_l.get("kind")
-        if env_r.get("kind") == "answer":
-            # ids and anchors should be identical (order may differ for ranked text_search; compare sets)
-            ids_r = {it.get("id") or it.get("anchor") for it in env_r.get("items", [])}
-            ids_l = {it.get("id") or it.get("anchor") for it in env_l.get("items", [])}
-            assert ids_r == ids_l
-            # citations exist in both
-            assert len(env_r.get("citations", [])) >= 1
-            assert len(env_l.get("citations", [])) >= 1
+        assert env_a.get("kind") == env_b.get("kind")
+        if env_a.get("kind") == "answer":
+            anchors_a = {it.get("anchor") for it in env_a.get("items", [])}
+            anchors_b = {it.get("anchor") for it in env_b.get("items", [])}
+            assert anchors_a == anchors_b
+            assert len(env_a.get("citations", [])) >= 1
+            assert len(env_b.get("citations", [])) >= 1
         else:
-            # refusal shape
-            assert "refusal" in env_r and "refusal" in env_l
-            assert env_r["refusal"]["variant"] == env_l["refusal"]["variant"]
+            assert "refusal" in env_a and "refusal" in env_b
+            assert env_a["refusal"]["variant"] == env_b["refusal"]["variant"]
 
 
 # ──────────────────────────────────────────────────────────────────────────────

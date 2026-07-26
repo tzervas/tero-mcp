@@ -6,6 +6,63 @@ Format: Keep a Changelog + SemVer.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-25 (token-efficiency tool-surface redesign)
+
+### Changed — BREAKING (tool surface, deliberately no longer Rust-parity)
+- **`query_by_id`/`query_by_status`/`query_by_kind`/`text_search` merged into one composable
+  `search` tool.** The four were the same operation (find rows, render a citation) wearing four
+  single-predicate schemas that couldn't compose — `kind == "issue" AND status == "todo"` was not
+  expressible pre-0.3.0. `search(text?, id?, kind?, family?, limit?, advanced={status?, tag?,
+  offset?, fields?, format?, order?})` — tiered so the common case (`search(text=...)`) reads a small
+  schema, with paging/projection/format nested behind `advanced` for the rare case.
+- **`cite`/`explain` reshaped around `ref`/`query`** instead of the old `kind`+`value`/`start`/`depth`
+  flat args: `cite(ref="<anchor-or-id>")` for the common "cite the thing I just found" case,
+  `cite(query={...})` (same shape as `search`, or `start`/`depth` for a `cross_ref` trace) for the
+  rarer "cite a fresh query" case.
+- **Nine tools -> six:** `identify`, `search`, `cross_ref`, `cite`, `explain`, `refresh`.
+- `cross_ref`/`identify`/`refresh` are unchanged.
+- **This is a deliberate, documented divergence from the Rust `tero-mcp` tool surface** (unmodified,
+  separate `tero-rs` crate/repo, out of scope for this change) — see README.md "Tool surface (0.3.0
+  redesign)" and "Matching the Rust server" for what's still shared (transport, error/refusal layer)
+  vs. not (the tool schemas themselves). The CLI wrapper still prefers a discovered Rust binary and
+  will silently serve the *old* nine-tool surface if one is found — `TERO_FORCE_LITE=1` guarantees
+  the 0.3.0 surface.
+
+### Added
+- **Token-efficient defaults.** `search` defaults to `format="compact"` (trimmed per-row fields —
+  `anchor`/`title`/`kind`/`score` — and no duplicate `explain.hits`), `limit=10`. Measured: 44-71%
+  smaller responses than the pre-0.3.0 full-envelope shape for the same query (README "Tool surface"
+  table).
+- **`empty_page` refusal variant.** A `search` whose predicates *do* match rows, but whose `offset`
+  pages past all of them, is a distinct typed refusal from `no_match` (which means the corpus has
+  nothing citable at all) — never a bare, ambiguous empty result either way.
+- **Field projection (`advanced.fields`)** — project any answer's items to an explicit field list
+  (`anchor` always force-included); unknown field names are rejected with the valid set listed, not
+  silently rendered as `null`.
+- **Server-side hard cap on `limit`** (`MAX_SEARCH_LIMIT=50`) — a caller-supplied `limit` above the
+  cap is clamped, and the clamp is reported in the `Explain` trace (mirrors the pre-existing
+  `cross_ref` depth-clamp pattern), never silently honored or silently dropped.
+- **Bounded `text` length** (`MAX_TEXT_LENGTH=2000` chars) — rejected above that, not truncated.
+- **Closed-set validation for `family`** (the one genuinely closed predicate — `doc|research|issue|
+  changelog|skill`) — an unknown value is a typed `bad_request` listing the valid set, not a silent
+  `no_match`. `kind`/`status`/`tag` remain open, free-text sets per `GENERATING-AN-INDEX.md` and are
+  *not* enum-validated (an unrecognized-but-legitimate value would otherwise be wrongly rejected).
+- **Constant-time-ish token comparison** (`auth.py`): `TokenTable.authorize` now compares the
+  presented token against every configured token with `hmac.compare_digest` instead of a
+  short-circuiting `dict.get` — a best-effort mitigation given this server's LAN-local, single-user,
+  stdio-only threat model (not a cryptographic guarantee; see `auth.py`'s docstring).
+- **Untrusted-content documentation.** README now states explicitly that `title`/`summary` fields are
+  corpus text, not server-authored instructions, and that `citations` (always full-shape, in every
+  `format`) is the provenance mitigation for that.
+- New agent-facing docs: README "Should an agent use this at all?", "Tool surface (0.3.0 redesign)",
+  "Security posture", "Index coverage — what should be indexed", "Token-efficiency verdict"; a new
+  `.claude/skills/tero-search/SKILL.md` with concrete example calls and realistic measured output.
+
+### Removed
+- `query_by_id`, `query_by_status`, `query_by_kind`, `text_search` as top-level tools (superseded by
+  `search`, see above). The `no_text_match` refusal variant is retired with `text_search` (its cases
+  are now `search`'s `no_match`).
+
 ## [0.2.0] - 2026-07-21 (memory-scope parity + standalone Rust engine)
 
 ### Added
