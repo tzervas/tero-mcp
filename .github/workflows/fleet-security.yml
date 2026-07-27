@@ -42,7 +42,6 @@ jobs:
   trivy-fs:
     name: trivy filesystem (vuln+secret+license)
     runs-on: [self-hosted, linux, x64, podman]
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Trivy fs

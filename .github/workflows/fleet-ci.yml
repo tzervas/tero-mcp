@@ -42,6 +42,19 @@ jobs:
     runs-on: [self-hosted, linux, x64, podman]
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Ensure cargo on PATH
+        run: |
+          set -euo pipefail
+          export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
+          if ! command -v cargo >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+            # shellcheck disable=SC1091
+            . "${CARGO_HOME:-$HOME/.cargo}/env"
+          fi
+          rustc --version
+          cargo --version
+          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
       - name: cargo check
         run: cargo check --workspace --all-targets
       - name: cargo test
@@ -77,7 +90,17 @@ jobs:
         run: |
           set -euo pipefail
           if [ -d tests ] || [ -d test ]; then
-            uv run pytest -q 2>/dev/null || pytest -q 2>/dev/null || echo "pytest failed or missing — mark job fail" >&2
+            # Decide the runner UP FRONT. Never fall back on an exit code: || fires on any
+            # non-zero, so `uv run pytest || pytest` retries in a different environment when the
+            # first run failed *because tests failed*, and a pass there greens a red suite.
+            if command -v uv >/dev/null 2>&1 && { [ -f uv.lock ] || [ -f pyproject.toml ]; }; then
+              RUN="uv run pytest"
+            else
+              RUN="pytest"
+            fi
+            # No 2>/dev/null: a CI log is where stderr belongs, and discarding it makes
+            # "tests failed" indistinguishable from "pytest is absent".
+            $RUN -q
           else
             echo "no tests/ directory — skip"
           fi
