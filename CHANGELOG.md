@@ -6,6 +6,20 @@ Format: Keep a Changelog + SemVer.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-21 (memory path smoke + version lockstep)
+
+Tagged release `v0.2.0` (Python lite already at 0.2.0). This entry records the remaining
+version debt: the in-tree Rust crate still advertised **0.1.0** via `CARGO_PKG_VERSION`
+(`serverInfo.version` on the Rust MCP front; fleet-ci `Checking tero-mcp v0.1.0` log line).
+
+### Fixed
+- **Rust crate version lockstep:** `rust/Cargo.toml` + `rust/Cargo.lock` **0.1.0 → 0.2.0** so
+  fleet-ci cargo and `serverInfo.version` match `pyproject.toml` / `tero_mcp_lite.__version__` /
+  git tag `v0.2.0`.
+
+### Added (already in tree at tag)
+- memory path smoke (`scripts/smoke-memory-path.sh`) + wrapper tests for tero-rs memory feature.
+
 ## [0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release)
 
 First productionized release of the `tero-mcp` front. Bumped from 0.1.0 (semver baseline).

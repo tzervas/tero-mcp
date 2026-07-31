@@ -1,0 +1,28 @@
+# Keep Cargo.lock and Actions majors current without hand-editing lockfiles.
+# Dependabot regenerates Cargo.lock on every cargo ecosystem PR.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /rust
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - rust
+    commit-message:
+      prefix: "chore(deps)"
+    # Lockfile is committed for this binary/engine crate; PRs always update it.
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "chore(ci)"
