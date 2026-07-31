@@ -12,6 +12,8 @@ import argparse
 import json
 import os
 import subprocess
+
+from .core import OPERATIONS
 import sys
 from pathlib import Path
 
@@ -135,6 +137,52 @@ def main(argv: list[str] | None = None) -> None:
     # Tero-first: prefer rs binary (mycelium-tero) when present; py is presenter + fallback.
     rs_bin = None if force_lite else _resolve_rust_binary()
     if rs_bin:
+        # SURFACE CHECK BEFORE EXEC.
+        #
+        # Previously this exec'd into whatever binary _resolve_rust_binary found and
+        # served that binary's tool surface, silently. A stale tero-rs on PATH meant
+        # clients got an API this package does not implement, with nothing said —
+        # in a server whose entire contract is "a query that finds nothing citable is
+        # a typed refusal, not an empty answer". Silently substituting the whole API
+        # is a larger version of exactly what that contract forbids.
+        #
+        # README lists this as required work: "teach the wrapper to detect a
+        # tool-surface version mismatch and refuse/warn instead of silently serving
+        # whichever surface the discovered binary happens to speak."
+        #
+        # Refuse by default rather than warn: a warning on stderr is invisible to an
+        # MCP client, which sees only the tool list — so a warning would leave the
+        # failure exactly as silent as it is now, from the caller's point of view.
+        surface = _discover_surface(rs_bin)
+        served = {t.get("name") for t in surface.get("tools", []) if isinstance(t, dict)}
+        if served:
+            expected = set(OPERATIONS)
+            missing, extra = expected - served, served - expected
+            if missing or extra:
+                allow = os.environ.get(
+                    "TERO_ALLOW_SURFACE_MISMATCH", ""
+                ).lower() in ("1", "true", "yes")
+                detail = (
+                    f"tero-rs at {rs_bin} (version {surface.get('version', 'unknown')}) "
+                    f"serves a different tool surface than this package expects.\n"
+                    f"  missing from binary: {sorted(missing) or 'none'}\n"
+                    f"  extra in binary:     {sorted(extra) or 'none'}"
+                )
+                if not allow:
+                    print(
+                        f"tero-mcp: REFUSING to launch — {detail}\n"
+                        f"  Serving it anyway would hand clients an API this package does not\n"
+                        f"  implement, with no indication anything was substituted.\n"
+                        f"  Fix the binary, or set TERO_FORCE_LITE=1 to use the Python backend,\n"
+                        f"  or TERO_ALLOW_SURFACE_MISMATCH=1 to proceed deliberately.",
+                        file=sys.stderr,
+                    )
+                    raise SystemExit(78)  # config error, matches the documented contract
+                print(
+                    f"tero-mcp: WARNING — {detail}\n"
+                    f"  Proceeding because TERO_ALLOW_SURFACE_MISMATCH is set.",
+                    file=sys.stderr,
+                )
         print(f"discovered tero-rs binary at {rs_bin} (tools from tero-rs binary)", file=sys.stderr)
         print("Python MCP server renders the dynamic surface (introspection/query/explain/maintenance categories)", file=sys.stderr)
         # Rebuild argv for the Rust bin (it understands --index and --describe).

@@ -53,6 +53,29 @@ def test_resolve_finds_real_layout_in_this_workspace() -> None:
         pytest.skip(f"discovered binary is not a workspace tero-rs layout build: {found}")
 
 
+_L1_OPS = frozenset(
+    {
+        "identify",
+        "query_by_id",
+        "query_by_status",
+        "query_by_kind",
+        "cross_ref",
+        "text_search",
+        "cite",
+        "explain",
+        "refresh",
+    }
+)
+_MEMORY_OPS = frozenset({"memory_store", "memory_retrieve", "memory_consolidate"})
+
+
+def _require_rust_binary() -> Path:
+    found = _resolve_rust_binary()
+    if found is None:
+        pytest.skip("no tero-rs binary (set TERO_RS_BINARY or build sibling release)")
+    return found
+
+
 def test_resolve_respects_force_lite(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("TERO_FORCE_LITE", "1")
     # even if real bin would be found, when main sees force it doesn't call resolve for primary
@@ -232,8 +255,7 @@ def _run_wrapper(
 
 def test_wrapper_delegates_to_rust_and_identify_reports_rust(index_path: Path) -> None:
     """End-to-end: wrapper finds real Rust, logs delegation, Rust serves, identify proves Rust."""
-    if _resolve_rust_binary() is None:
-        pytest.skip("no tero-rs binary available — Rust delegation path not exercised in this layout")
+    _require_rust_binary()
     req = json.dumps(
         {
             "jsonrpc": "2.0",
@@ -251,19 +273,10 @@ def test_wrapper_delegates_to_rust_and_identify_reports_rust(index_path: Path) -
     assert env["name"] == "tero"
     assert "M-1016 QueryEngine" in env["engine"]
     assert "layer2_enabled" in env
-    # FULL COVERAGE (maintainer requirement #1): the delegated Rust engine exposes every tero
-    # operation — the wrapper's whole point is to prefer this full-capability backend.
-    assert set(env["operations"]) == {
-        "identify",
-        "query_by_id",
-        "query_by_status",
-        "query_by_kind",
-        "cross_ref",
-        "text_search",
-        "cite",
-        "explain",
-        "refresh",
-    }
+    # Full L1 coverage required; optional memory feature may advertise 3 extra ops.
+    ops = set(env["operations"])
+    assert _L1_OPS.issubset(ops)
+    assert ops - _L1_OPS <= _MEMORY_OPS
     # serverInfo would have been "tero-mcp" if we had done initialize too; this is sufficient
 
 
@@ -304,6 +317,7 @@ def test_wrapper_missing_rust_bin_falls_back_to_lite(monkeypatch: pytest.MonkeyP
 
 def test_wrapper_rust_path_query_by_id_and_refusal(index_path: Path) -> None:
     """A positive lookup + a typed refusal over the Rust path via wrapper."""
+    _require_rust_binary()
     # query_by_id hit
     hit = json.dumps(
         {
@@ -343,8 +357,7 @@ def test_rust_backend_identify_is_performant(index_path: Path) -> None:
     """Identify via wrapper+rust should be comfortably sub-100ms even on real indexes.
     This is a regression guard + "performant" smoke, not a full benchmark.
     """
-    if _resolve_rust_binary() is None:
-        pytest.skip("no tero-rs binary available — Rust perf smoke not exercised in this layout")
+    _require_rust_binary()
     req = json.dumps(
         {
             "jsonrpc": "2.0",
@@ -417,6 +430,7 @@ def _extract_envelope(resp: dict) -> dict:
 
 def test_rust_vs_lite_parity_on_fixture_queries(index_path: Path) -> None:
     """Same queries via force-lite Python and default Rust; core fields must match for L1."""
+    _require_rust_binary()
     queries = [
         ("query_by_id", {"value": "RFC-0034"}),
         ("query_by_status", {"value": "done"}),
@@ -462,6 +476,7 @@ def test_rust_vs_lite_parity_on_fixture_queries(index_path: Path) -> None:
 
 def test_real_workspace_index_queries_are_fast_and_correct() -> None:
     """Smoke the actual index used by the live tero MCP registration."""
+    _require_rust_binary()
     repo_root = Path(__file__).resolve().parents[1]
     ws_index = Path(
         os.environ.get(
@@ -469,10 +484,11 @@ def test_real_workspace_index_queries_are_fast_and_correct() -> None:
             str(repo_root.parent / "dev-docs" / "docs" / "tero-index" / "index.json"),
         )
     )
-    if not ws_index.exists():
-        pytest.skip(f"optional workspace hub index not present: {ws_index}")
-    if _resolve_rust_binary() is None:
-        pytest.skip("no tero-rs binary — real-index Rust path smoke not exercised")
+    try:
+        if not ws_index.exists():
+            pytest.skip(f"optional workspace hub index not present: {ws_index}")
+    except PermissionError:
+        pytest.skip(f"workspace hub index not readable: {ws_index}")
 
     # Use a robust query on the real workspace index (anchors here are used; query_by_kind is reliable)
     req = json.dumps(
