@@ -1,7 +1,8 @@
 name: CI
 
 # Triggered on push/PR; also manual. Local parity: ./scripts/check.sh
-# Linux x64 jobs: self-hosted Podman fleet.
+# CPU on homelab (host-homelab + scribe-cpu-build). WSL is GPU-only — do not schedule CPU here.
+# This job is Python lite parity only (pytest + index). Rust is fleet-ci cargo jobs — not GPU.
 on:
   push:
     branches: [main, dev]
@@ -15,12 +16,14 @@ permissions:
 jobs:
   check:
     name: Local-parity checks
-    runs-on: [self-hosted, linux, x64, podman]
-    timeout-minutes: 20
+    runs-on: [self-hosted, linux, x64, podman, compute-cpu, host-homelab, scribe-cpu-build]
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
         with:
-          enable-cache: true
+          # auto = cache on GH-hosted only; force-true on self-hosted often stalls on post cache upload
+          enable-cache: false
       - name: Local-parity checks
+        # default check.sh skips unbounded cargo test (see scripts/check.sh); fleet-ci owns rust
         run: bash scripts/check.sh
