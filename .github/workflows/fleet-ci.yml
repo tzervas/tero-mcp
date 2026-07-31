@@ -59,22 +59,39 @@ jobs:
           rustc --version
           cargo --version
           echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
-      - name: cargo check
-        # engine crate lives in rust/ for this repo; fall back to workspace root
+      - name: cargo lockfile locked (no hand-edit drift)
+        # Fail if Cargo.toml changed without regenerating Cargo.lock.
+        # After any manifest edit: ./scripts/sync-cargo-lock.sh
         run: |
           set -euo pipefail
+          export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-1}"
           if [ -f rust/Cargo.toml ]; then
-            (cd rust && cargo check --workspace --all-targets)
+            (cd rust && cargo metadata --format-version 1 --locked >/dev/null)
+          elif [ -f Cargo.toml ]; then
+            cargo metadata --format-version 1 --locked >/dev/null
           else
-            cargo check --workspace --all-targets
+            echo "no Cargo.toml" >&2
+            exit 1
+          fi
+      - name: cargo check
+        # engine crate lives in rust/ for this repo; fall back to workspace root
+        # --locked: committed Cargo.lock is the graph; never silent regen on CI
+        run: |
+          set -euo pipefail
+          export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-1}"
+          if [ -f rust/Cargo.toml ]; then
+            (cd rust && cargo check --locked --workspace --all-targets)
+          else
+            cargo check --locked --workspace --all-targets
           fi
       - name: cargo test
         run: |
           set -euo pipefail
+          export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-1}"
           if [ -f rust/Cargo.toml ]; then
-            (cd rust && cargo test --workspace)
+            (cd rust && cargo test --locked --workspace)
           else
-            cargo test --workspace
+            cargo test --locked --workspace
           fi
 
   python:
