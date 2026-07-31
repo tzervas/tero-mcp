@@ -25,6 +25,13 @@ Format: Keep a Changelog + SemVer.
   resolution order (`TERO_FORCE_LITE` / `TERO_RS_BINARY` / sibling `tero-rs` build / `PATH`) that
   was previously only implicit in code comments.
 
+### Fixed
+- **Rust crate version lockstep:** `rust/Cargo.toml` + `rust/Cargo.lock` **0.1.0 → 0.2.0** so
+  fleet-ci cargo and `serverInfo.version` match `pyproject.toml` / `tero_mcp_lite.__version__` /
+  git tag `v0.2.0`.
+- **Surface-mismatch refuse (#36):** wrapper compares binary `--describe` tool names to package
+  `OPERATIONS` and exits 78 on mismatch (`TERO_ALLOW_SURFACE_MISMATCH=1` override).
+
 ### Changed
 - **Rust engine resynced standalone from tero-rs, dropping the `mycelium_doc`/`mycelium_vsa` path
   deps** — `rust/` now vendors its own markdown ingest + VSA2 algebra and builds independently of
@@ -42,6 +49,7 @@ Format: Keep a Changelog + SemVer.
 - Still deferred (see README "Framework — remaining tasks" and `docs/MEMORY_TOOLS.md`): a live
   Rust↔Python differential parity test, an HTTP front, and Layer-2/VSA semantic search in
   `tero-mcp-lite` itself (`identify` continues to report `layer2_enabled: false`).
+
 
 ## [0.1.1] - 2026-07-10 (tooling-1.0-readiness wave — productionization + first package release)
 

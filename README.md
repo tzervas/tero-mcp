@@ -1,5 +1,10 @@
 # tero-mcp-lite
 
+<!-- FLEET-BADGES:BEGIN -->
+[![CI](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-ci.yml/badge.svg?branch=main)](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-ci.yml?query=branch%3Amain)
+[![Security](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-security.yml/badge.svg?branch=main)](https://github.com/tzervas/tero-mcp/actions/workflows/fleet-security.yml?query=branch%3Amain)
+<!-- FLEET-BADGES:END -->
+
 A lightweight, portable **MCP (Model Context Protocol) server** over a Tero corpus `index.json` —
 the Python-only counterpart to the Rust `tero-mcp` binary in **tero-rs**
 (`src/bin/tero-mcp.rs` in the `tero-rs` crate, DN-87 / E39-1). It answers cited, provenance-carrying
@@ -279,16 +284,18 @@ posture as a Mycelium-repo artifact).
 ## Status & roadmap
 
 - [Assessment & gaps](docs/ASSESSMENT.md)
+- [Cargo.lock policy](docs/CARGO-LOCKFILE.md)
 - [Product roadmap & API plans](docs/ROADMAP.md)
 
-## Semver + Releases (2026-07-10 appended)
+## Semver + Releases
 
-Semver baseline established writ large (plan.md, Tero-scoped survey across workspace).
+**Current release:** `v0.2.0` (2026-07-21).
 
-- tero-mcp-lite: 0.1.0 (no prior tags).
-- Local uv build, annotated tag v0.1.0, gh release (dist attached).
-- Local podman GHCR for any future container dist (preference confirmed; peri example completed this way).
-- Process + cites in docs/ROADMAP.md semver section.
-- Hygiene + tero-index update done.
+| Source | Version |
+|--------|---------|
+| `pyproject.toml` / `tero_mcp_lite.__version__` | **0.2.0** |
+| `rust/Cargo.toml` (`CARGO_PKG_VERSION` / MCP `serverInfo`) | **0.2.0** |
+| GitHub Release / tag | **v0.2.0** |
 
-Cites: plan.md, git/tero baselines (most 0.1.0 no tags), current-status.
+Prior: v0.1.0 baseline, v0.1.1 first package release. PyPI not published (install from git/uv path).
+Process + cites: `docs/ROADMAP.md` semver section.

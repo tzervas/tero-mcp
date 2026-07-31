@@ -1,0 +1,25 @@
+# Commitizen configuration (commitizen-tools).
+# Install (optional): uv tool install commitizen
+# Valid without the CLI: humans and agents follow the same conventional-commit rules.
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.2.0"
+tag_format = "v$version"
+version_scheme = "semver"
+major_version_zero = true
+
+# Keep these lockstep on every bump. They drifted once: v0.2.0 was tagged and released
+# while both files still said 0.1.1, so `uv tool install ...@v0.2.0` produced a package
+# that self-reported 0.1.1 — and `identify` (core.py) returns __version__ to callers,
+# so the MCP server told every agent the wrong version of itself.
+#
+# rust/Cargo.toml is deliberately NOT listed: that is a separate package (`tero-mcp`),
+# not this one (`tero-mcp-lite`), and versioning them together would be a lie.
+version_files = [
+    "pyproject.toml:version",
+    "src/tero_mcp_lite/__init__.py:__version__",
+]
+
+update_changelog_on_bump = false
+changelog_file = "CHANGELOG.md"
