@@ -21,16 +21,18 @@ jobs:
   detect:
     name: detect stack
     runs-on: [self-hosted, linux, x64, podman, compute-cpu, host-homelab, scribe-cpu-build]
+    timeout-minutes: 10
     outputs:
       rust: ${{ steps.d.outputs.rust }}
       python: ${{ steps.d.outputs.python }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: d
         run: |
           set -euo pipefail
           rust=false; python=false
-          if [ -f Cargo.toml ]; then rust=true; fi
+          # tero-mcp keeps the engine under rust/ (no root Cargo.toml)
+          if [ -f Cargo.toml ] || [ -f rust/Cargo.toml ]; then rust=true; fi
           if [ -f pyproject.toml ] || [ -f requirements.txt ] || [ -f setup.py ]; then python=true; fi
           echo "rust=$rust" >> "$GITHUB_OUTPUT"
           echo "python=$python" >> "$GITHUB_OUTPUT"
@@ -41,8 +43,9 @@ jobs:
     needs: detect
     if: needs.detect.outputs.rust == 'true'
     runs-on: [self-hosted, linux, x64, podman, compute-cpu, host-homelab, scribe-cpu-build]
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Ensure cargo on PATH
         run: |
@@ -57,22 +60,37 @@ jobs:
           cargo --version
           echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> "$GITHUB_PATH"
       - name: cargo check
-        run: cargo check --workspace --all-targets
+        # engine crate lives in rust/ for this repo; fall back to workspace root
+        run: |
+          set -euo pipefail
+          if [ -f rust/Cargo.toml ]; then
+            (cd rust && cargo check --workspace --all-targets)
+          else
+            cargo check --workspace --all-targets
+          fi
       - name: cargo test
-        run: cargo test --workspace
+        run: |
+          set -euo pipefail
+          if [ -f rust/Cargo.toml ]; then
+            (cd rust && cargo test --workspace)
+          else
+            cargo test --workspace
+          fi
 
   python:
     name: python lint/test
     needs: detect
     if: needs.detect.outputs.python == 'true'
     runs-on: [self-hosted, linux, x64, podman, compute-cpu, host-homelab, scribe-cpu-build]
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9
         with:
           version: "latest"
-          enable-cache: true
+          # self-hosted: local uv cache is enough; GH Actions cache post often stalls
+          enable-cache: false
       - name: Sync (best-effort)
         run: |
           set -euo pipefail
@@ -111,6 +129,7 @@ jobs:
     needs: detect
     if: needs.detect.outputs.rust != 'true' && needs.detect.outputs.python != 'true'
     runs-on: [self-hosted, linux, x64, podman, compute-cpu, host-homelab, scribe-cpu-build]
+    timeout-minutes: 20
     steps:
       - run: |
           echo "No Cargo.toml / pyproject detected. fleet-ci reports success with no gates."
