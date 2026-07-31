@@ -266,6 +266,7 @@ posture as a Mycelium-repo artifact).
 ## Status & roadmap
 
 - [Assessment & gaps](docs/ASSESSMENT.md)
+- [Cargo.lock policy](docs/CARGO-LOCKFILE.md)
 - [Product roadmap & API plans](docs/ROADMAP.md)
 
 ## Semver + Releases
