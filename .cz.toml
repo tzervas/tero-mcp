@@ -1,6 +1,10 @@
 # Commitizen configuration (commitizen-tools).
 # Install (optional): uv tool install commitizen
 # Valid without the CLI: humans and agents follow the same conventional-commit rules.
+# Canonical peer reference: tzervas/gha-runner-ctl/.cz.toml
+#
+# `version` below is the version cz bumps *from*. It must track the newest released tag:
+# if it lags, `cz bump` re-mints a version that already has a tag.
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -15,7 +19,8 @@ major_version_zero = true
 # so the MCP server told every agent the wrong version of itself.
 #
 # rust/Cargo.toml is deliberately NOT listed: that is a separate package (`tero-mcp`),
-# not this one (`tero-mcp-lite`), and versioning them together would be a lie.
+# not this one (`tero-mcp-lite`), and versioning them together would be a lie. That the
+# two currently share the number 0.2.0 is a coincidence, not a contract.
 version_files = [
     "pyproject.toml:version",
     "src/tero_mcp_lite/__init__.py:__version__",
