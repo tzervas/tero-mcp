@@ -1534,7 +1534,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 [[package]]
 name = "memory-gate-rs"
 version = "1.0.0"
-source = "git+https://github.com/tzervas/memory-gate-rs#be2b2380cbbbae1b73c7fa7e1365a1c4c121f2a7"
+source = "git+https://github.com/tzervas/memory-gate-rs#02bccedc171d19e475b5d5a0c2dad83ecc3291e5"
 dependencies = [
  "async-trait",
  "chrono",
