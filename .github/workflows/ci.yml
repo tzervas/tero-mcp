@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v9.0.0
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           # auto = cache on GH-hosted only; force-true on self-hosted often stalls on post cache upload
           enable-cache: false
